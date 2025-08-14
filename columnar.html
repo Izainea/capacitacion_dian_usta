@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo: Bases de Datos Columnares</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        section { display: none; animation: fadeIn 0.5s; }
+        section.active { display: block; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: scale(0.98); } 
+            to { opacity: 1; transform: scale(1); } 
+        }
+        .diagram-container {
+            min-height: 350px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <a href="index.html" class="absolute top-4 left-4 bg-gray-700 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-all z-20">🏠 Inicio</a>
+    
+    <main class="w-full max-w-6xl mx-auto">
+        <!-- Slide 1: Título -->
+        <section>
+            <div class="bg-gray-800 p-12 rounded-2xl shadow-xl text-center border-t-8 border-teal-500">
+                <h2 class="text-5xl font-black text-white mb-4 tracking-tight">Bases de Datos Columnares</h2>
+                <p class="text-2xl text-teal-300"><b>Optimizadas para Big Data y Analítica a Gran Escala</b></p>
+            </div>
+        </section>
+
+        <!-- Slide 2: La Analogía -->
+        <section>
+            <div class="bg-gray-800 p-8 rounded-2xl shadow-xl border-t-8 border-teal-500">
+                <h2 class="text-3xl font-bold text-teal-300 mb-6">La Gran Diferencia: Filas vs. Columnas</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="text-xl text-gray-300 mb-4">Imagina una hoja de cálculo gigantesca con miles de millones de filas de datos de sensores (IoT).</p>
+                        <ul class="list-disc list-inside space-y-4 text-lg text-gray-400">
+                            <li>Una base de datos **tradicional (orientada a filas)** guarda los datos así: `Fila 1 -> Fila 2 -> Fila 3`. Si quieres calcular el promedio de la columna "Temperatura", tiene que leer cada fila entera para extraer solo ese valor.</li>
+                            <li>Una base de datos **columnar** guarda los datos así: `Columna SensorID -> Columna Temperatura -> Columna Timestamp`. Si quieres el promedio de "Temperatura", lee únicamente ese bloque de datos, ignorando todo lo demás.</li>
+                        </ul>
+                    </div>
+                    <div id="diagram-row-vs-column" class="bg-gray-900 p-4 rounded-lg flex justify-center items-center diagram-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Fortalezas y Casos de Uso -->
+        <section>
+             <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl border-t-8 border-teal-500">
+                <h2 class="text-3xl font-bold text-teal-300 mb-6">Fortalezas y Casos de Uso</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="text-lg text-gray-300 mb-4">Este diseño de almacenamiento les da superpoderes para ciertos tipos de cargas de trabajo:</p>
+                        <ul class="list-disc list-inside space-y-2 text-lg text-gray-400">
+                            <li><b>Agregaciones Ultra Rápidas:</b> Son increíblemente eficientes para consultas analíticas (`SUM`, `AVG`, `COUNT`) que operan sobre un subconjunto de columnas en muchas filas.</li>
+                            <li><b>Alta Compresión:</b> Almacenar datos del mismo tipo juntos (todas las temperaturas, todas las fechas) permite una compresión mucho más efectiva, ahorrando espacio en disco.</li>
+                            <li><b>Escritura de Alta Velocidad:</b> Están diseñadas para ingerir enormes volúmenes de datos (ej. millones de eventos por segundo) de forma muy eficiente.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-700 p-6 rounded-lg text-lg">
+                        <h3 class="text-2xl font-bold text-white mb-3">Ideales para:</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-300">
+                            <li><b>Series Temporales:</b> Datos de sensores (IoT), métricas de aplicaciones, datos financieros.</li>
+                            <li><b>Analítica de Big Data:</b> Logs de eventos, datos de telemetría, clickstreams.</li>
+                            <li><b>Cualquier caso de uso con muchas escrituras</b> y consultas de agregación.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Ejemplos Populares -->
+        <section>
+             <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl border-t-8 border-teal-500">
+                <h2 class="text-3xl font-bold text-teal-300 mb-6">Ejemplos Populares en la Industria</h2>
+                <div class="grid md:grid-cols-2 gap-8 text-lg">
+                    <div class="bg-gray-700 p-6 rounded-lg">
+                        <h3 class="text-2xl font-bold text-white mb-3">Apache Cassandra</h3>
+                        <p class="text-gray-400 mb-3">Nacida en Facebook. Famosa por su increíble escalabilidad horizontal y su alta disponibilidad. No tiene un único punto de fallo.</p>
+                        <p class="text-gray-300"><b>Usada por:</b> Netflix, Instagram, Apple.</p>
+                    </div>
+                    <div class="bg-gray-700 p-6 rounded-lg">
+                        <h3 class="text-2xl font-bold text-white mb-3">Google Cloud Bigtable</h3>
+                        <p class="text-gray-400 mb-3">La misma base de datos que potencia muchos servicios de Google, como Gmail, YouTube y Google Analytics. Totalmente gestionada.</p>
+                        <p class="text-gray-300"><b>Usada por:</b> Google (internamente), Spotify, Twitter.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Profundizando en Cassandra -->
+        <section>
+            <div class="bg-gray-800 p-8 rounded-2xl shadow-xl border-t-8 border-teal-500">
+                <h2 class="text-3xl font-bold text-teal-300 mb-6">Profundizando en Cassandra: Arquitectura Distribuida</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="text-lg text-gray-300 mb-4">Cassandra es un maestro de la resiliencia y la escala. Su arquitectura se basa en un **anillo de nodos sin un maestro central**.</p>
+                        <ul class="list-disc list-inside space-y-2 text-lg text-gray-400">
+                            <li><b>Sin Punto Único de Fallo:</b> Todos los nodos son iguales. Si un nodo se cae, la base de datos sigue funcionando sin interrupción.</li>
+                            <li><b>Replicación:</b> Los datos se replican automáticamente a través de múltiples nodos en el anillo. El **Factor de Replicación** (ej. 3) define cuántas copias de cada dato existen.</li>
+                            <li><b>Consistencia Ajustable:</b> Puedes decidir en cada consulta cuántas réplicas deben responder para que la operación sea exitosa. Esto permite un balance flexible entre consistencia y rendimiento.</li>
+                        </ul>
+                    </div>
+                    <div id="diagram-cassandra" class="bg-gray-900 p-4 rounded-lg flex justify-center items-center diagram-container"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <div class="fixed bottom-8 flex space-x-4 z-10">
+        <button id="prevBtn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+        <button id="nextBtn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
+    </div>
+    
+    <script>
+        function drawRowVsColumnDiagram() {
+            const containerId = "#diagram-row-vs-column";
+            d3.select(containerId).select("svg").remove();
+            const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 500 400`);
+            
+            svg.append('text').text('Orientado a Filas (SQL)').attr('x', 125).attr('y', 30).attr('text-anchor', 'middle').attr('fill', 'white').style('font-weight', 'bold');
+            const rowData = [
+                { y: 50, color: '#a78bfa', text: 'ID:1, Temp:22, Time:10:00' },
+                { y: 90, color: '#a78bfa', text: 'ID:2, Temp:23, Time:10:01' },
+                { y: 130, color: '#a78bfa', text: 'ID:1, Temp:24, Time:10:02' }
+            ];
+            svg.selectAll('.row-rect').data(rowData).join('rect')
+                .attr('x', 10).attr('y', d => d.y).attr('width', 230).attr('height', 30)
+                .attr('fill', d => d.color).attr('rx', 5);
+            svg.selectAll('.row-text').data(rowData).join('text')
+                .attr('x', 125).attr('y', d => d.y + 15).attr('text-anchor', 'middle').attr('dy', '0.3em')
+                .attr('fill', 'black').style('font-size', '12px').text(d => d.text);
+
+            svg.append('text').text('Orientado a Columnas (NoSQL)').attr('x', 375).attr('y', 30).attr('text-anchor', 'middle').attr('fill', 'white').style('font-weight', 'bold');
+            const colData = [
+                { x: 260, color: '#6366f1', title: 'ID', values: ['1', '2', '1'] },
+                { x: 350, color: '#ef4444', title: 'Temp', values: ['22', '23', '24'] },
+                { x: 440, color: '#f59e0b', title: 'Time', values: ['10:00', '10:01', '10:02'] }
+            ];
+            const colGroups = svg.selectAll('.col-group').data(colData).join('g')
+                .attr('transform', d => `translate(${d.x}, 50)`);
+            
+            colGroups.append('text').text(d => d.title).attr('x', 40).attr('y', 0).attr('text-anchor', 'middle').attr('fill', d => d.color);
+            colGroups.selectAll('.col-rect').data(d => d.values).join('rect')
+                .attr('x', 0).attr('y', (d, i) => i * 40 + 20).attr('width', 80).attr('height', 30)
+                .attr('fill', d_parent => d_parent.color).attr('rx', 5);
+            colGroups.selectAll('.col-text').data(d => d.values).join('text')
+                .attr('x', 40).attr('y', (d, i) => i * 40 + 35).attr('text-anchor', 'middle').attr('dy', '0.3em')
+                .attr('fill', 'black').style('font-size', '12px').text(d => d);
+
+            svg.append('text').text('AVG(Temp)').attr('x', 390).attr('y', 250).attr('fill', '#4ade80').style('font-weight', 'bold');
+            svg.append('path').attr('d', 'M 390 230 Q 390 190 390 150').attr('stroke', '#4ade80').attr('stroke-width', 3).attr('fill', 'none')
+                .attr('marker-end', 'url(#arrow-green)');
+            svg.append('defs').append('marker').attr('id', 'arrow-green').attr('viewBox', '0 -5 10 10').attr('refX', 5).attr('refY', 0).attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto').append('path').attr('d', 'M0,-5L10,0L0,5').attr('fill', '#4ade80');
+        }
+
+        function drawCassandraDiagram() {
+            const containerId = "#diagram-cassandra";
+            d3.select(containerId).select("svg").remove();
+            const width = 400, height = 350;
+            const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+            const numNodes = 8;
+            const radius = 120;
+            const nodes = Array.from({length: numNodes}, (_, i) => {
+                const angle = (i / numNodes) * 2 * Math.PI;
+                return {
+                    id: `Nodo ${i+1}`,
+                    x: width / 2 + radius * Math.cos(angle),
+                    y: height / 2 + radius * Math.sin(angle),
+                    color: '#2dd4bf'
+                };
+            });
+            
+            // Draw ring
+            svg.append('circle').attr('cx', width/2).attr('cy', height/2).attr('r', radius)
+                .attr('stroke', '#14b8a6').attr('stroke-dasharray', '5,5').attr('fill', 'none');
+
+            // Draw nodes
+            const node = svg.selectAll('.node').data(nodes).join('g')
+                .attr('transform', d => `translate(${d.x}, ${d.y})`);
+            
+            node.append('circle').attr('r', 25).attr('fill', d => d.color);
+            node.append('text').text(d => d.id).attr('text-anchor', 'middle').attr('dy', '0.3em').attr('fill', 'black').style('font-size', '10px');
+
+            // Simulate replication
+            const coordinator = nodes[0];
+            const replicas = [nodes[1], nodes[2]];
+            svg.append('text').text('Dato X').attr('x', 50).attr('y', 50).attr('fill', '#f59e0b').style('font-weight', 'bold');
+            replicas.forEach(replica => {
+                svg.append('path').attr('d', `M 70 60 Q ${(coordinator.x + replica.x)/2} ${(coordinator.y + replica.y)/2 - 50} ${replica.x} ${replica.y}`)
+                    .attr('stroke', '#f59e0b').attr('stroke-width', 2).attr('fill', 'none');
+            });
+            coordinator.color = '#f59e0b'; // Highlight coordinator
+        }
+
+        const slides = document.querySelectorAll('main > section'); 
+        let currentSlide = 0;
+        const prevBtn = document.getElementById('prevBtn'); 
+        const nextBtn = document.getElementById('nextBtn');
+        
+        function drawVisibleDiagram() {
+            const activeSlide = slides[currentSlide];
+            if (!activeSlide) return;
+            const container = activeSlide.querySelector('.diagram-container');
+            if (!container) return;
+            d3.select(container).select("svg").remove();
+            
+            switch (container.id) {
+                case 'diagram-row-vs-column':
+                    drawRowVsColumnDiagram();
+                    break;
+                case 'diagram-cassandra':
+                    drawCassandraDiagram();
+                    break;
+            }
+        }
+
+        function showSlide(index) { 
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index)); 
+            prevBtn.disabled = index === 0;
+            prevBtn.classList.toggle('opacity-50', index === 0);
+            nextBtn.disabled = index === slides.length - 1;
+            nextBtn.classList.toggle('opacity-50', index === slides.length - 1);
+            drawVisibleDiagram();
+        }
+        
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } });
+        nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } });
+        document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') nextBtn.click(); else if (e.key === 'ArrowLeft') prevBtn.click(); });
+        
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 2: De Bronce a Plata</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #111827; /* bg-gray-900 */
+        }
+        section { 
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out; 
+            width: 100%;
+        }
+        section.active { 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .diagram-container { 
+            min-height: 450px; 
+            width: 100%; 
+        }
+        .card { 
+            transition: all 0.2s ease-in-out; 
+        }
+        .card:hover { 
+            transform: scale(1.03); 
+            box-shadow: 0 0 30px rgba(167, 139, 250, 0.3); /* Sombra violeta */
+        }
+        .content-box {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-top: 8px solid #8b5cf6; /* border-violet-500 */
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            width: 100%;
+        }
+        .code-block {
+            background-color: #0d1117;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            border: 1px solid #30363d;
+        }
+    </style>
+</head>
+<body class="text-white flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <main class="w-full max-w-6xl mx-auto">
+        <!-- Slide 1: Título -->
+        <section><div class="content-box text-center"><h2 class="text-5xl font-black text-white mb-4 tracking-tight">De Bronce a Plata</h2><p class="text-2xl text-gray-300"><b>Módulo 2: Del Dato Crudo a la Fuente de la Verdad</b></p></div></section>
+
+        <!-- Slide 2: Agenda -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Agenda del Módulo</h2><ol class="list-decimal list-inside space-y-4 text-xl text-gray-300"><li><b>El "Porqué" de la Confianza:</b> Superpoderes de Delta Lake (ACID y Auditoría).</li><li><b>El "Qué" del Modelo:</b> Nuestro plano con la metodología Kimball.</li><li><b>El "Cómo" hacerlo Rápido:</b> Optimización física con Particionamiento y Z-Ordering.</li><li><b>Taller Práctico:</b> Construcción del modelo dimensional optimizado.</li></ol></div></section>
+
+        <!-- Parte 1: El "Porqué" -->
+        <section><div class="content-box text-center"><p class="text-xl text-violet-400 font-bold">Parte 1: El "Porqué" de la Confianza</p><h2 class="text-5xl font-black text-white mt-2 tracking-tight">Los Superpoderes de Delta Lake</h2></div></section>
+
+        <!-- Slide 4: ACID -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Garantías ACID: Confianza en tus Datos</h2><p class="text-lg text-gray-400 text-center mb-8">Delta Lake trae la fiabilidad de las bases de datos tradicionales al Data Lake.</p><div id="diagram-acid" class="diagram-container"></div></div></section>
+
+        <!-- Slide 5: Auditoría y Time Travel -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Diario de Transacciones</h2><p class="text-lg text-gray-400 text-center mb-8">Cada cambio en una tabla Delta queda registrado en un historial. Esto nos da dos capacidades increíbles.</p><div class="grid md:grid-cols-2 gap-8 text-center"><div class="bg-gray-700 p-6 rounded-lg"> <h3 class="text-2xl font-bold text-cyan-300 mb-3">Auditoría Completa</h3><p class="text-gray-300">Saber quién, qué, cuándo y cómo se modificaron los datos.</p></div><div class="bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-green-300 mb-3">Viaje en el Tiempo</h3><p class="text-gray-300">Consultar o restaurar la tabla a cualquier punto anterior en el tiempo.</p></div></div></div></section>
+
+        <!-- Slide 6: DESCRIBE HISTORY -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Auditoría: `DESCRIBE HISTORY`</h2><p class="text-lg text-gray-400 text-center mb-8">El primer paso para auditar es consultar el historial de la tabla.</p><div class="code-block"><pre><code class="language-sql">-- Consultar el historial es así de simple:
+DESCRIBE HISTORY curso_arquitecturas.pedidos_bronze;
+
+-- Esto nos muestra cada versión, la operación, el usuario y la hora.</code></pre></div></div></section>
+        
+        <!-- Slide 7: Time Travel -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Time Travel: `VERSION AS OF`</h2><p class="text-lg text-gray-400 text-center mb-8">Podemos consultar una "foto" pasada de la tabla usando su número de versión.</p><div class="code-block"><pre><code class="language-sql">-- Comparar el número de filas antes (versión 1) y después (versión 2) de un borrado.
+SELECT 'Version 1' AS v, COUNT(*) FROM pedidos_bronze VERSION AS OF 1
+UNION ALL
+SELECT 'Version 2' AS v, COUNT(*) FROM pedidos_bronze VERSION AS OF 2;</code></pre></div></div></section>
+        
+        <!-- Slide 8: RESTORE -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Recuperación: `RESTORE`</h2><p class="text-lg text-gray-400 text-center mb-8">Si cometemos un error, `RESTORE` es la forma más segura de "deshacer" un cambio y volver a una versión anterior.</p><div class="code-block"><pre><code class="language-sql">-- Deshacer todos los cambios y volver al estado de la versión 1.
+RESTORE TABLE curso_arquitecturas.pedidos_bronze TO VERSION AS OF 1;</code></pre></div></div></section>
+
+        <!-- Slide 9: Change Data Feed -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Auditoría a Nivel de Fila: CDF</h2><p class="text-lg text-gray-400 text-center mb-8">Para ver las filas exactas que cambiaron, primero debemos habilitar el Change Data Feed (CDF).</p><div class="code-block"><pre><code class="language-sql">-- 1. Habilitar CDF en la tabla (solo se hace una vez)
+ALTER TABLE pedidos_bronze SET TBLPROPERTIES ('delta.enableChangeDataFeed' = 'true');
+
+-- 2. Realizar un cambio
+DELETE FROM pedidos_bronze WHERE metodo_pago = 'PayPal';
+
+-- 3. Ver las filas exactas que se borraron entre la versión 2 y 3
+SELECT * FROM table_changes('pedidos_bronze', 2, 3) WHERE _change_type = 'delete';</code></pre></div></div></section>
+
+        <!-- Parte 2: El "Qué" -->
+        <section><div class="content-box text-center"><p class="text-xl text-violet-400 font-bold">Parte 2: El "Qué" del Modelo</p><h2 class="text-5xl font-black text-white mt-2 tracking-tight">Nuestro Plano: Kimball</h2></div></section>
+
+        <!-- Slide 11: Modelo Kimball -->
+        <section><div class="content-box w-full"><h2 class="text-4xl font-bold text-white mb-6 text-center">Nuestro Plano: El Esquema en Estrella</h2><div class="grid md:grid-cols-2 gap-8 items-center text-lg"><div><p class="text-gray-300">Para la capa Plata, usaremos la metodología **Kimball** para crear un **esquema en estrella**. Este modelo es el estándar de la industria para Data Warehousing porque es:</p><ul class="list-disc list-inside space-y-2 text-gray-400 mt-4"><li><b>Intuitivo:</b> Separa los números (Hechos) del contexto (Dimensiones).</li><li><b>Optimizado para Consultas:</b> Diseñado para que los análisis sean rápidos.</li><li><b>Escalable:</b> Permite añadir nuevos hechos y dimensiones fácilmente.</li></ul></div><div id="diagram-kimball" class="diagram-container"></div></div></div></section>
+
+        <!-- Slide 12: Dimensiones -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Paso 1: Crear las Dimensiones</h2><p class="text-lg text-gray-400 text-center mb-8">Las dimensiones son el "quién, qué, dónde, cuándo" de nuestros datos. Las creamos limpiando los datos de Bronce y declarando sus claves primarias (`PK`).</p><div class="code-block"><pre><code class="language-sql">CREATE OR REPLACE TABLE usuarios_silver (
+  id_usuario BIGINT NOT NULL,
+  nombre_usuario STRING, ...
+);
+ALTER TABLE usuarios_silver ADD CONSTRAINT pk_usuarios PRIMARY KEY(id_usuario) NOT ENFORCED;</code></pre></div></div></section>
+
+        <!-- Slide 13: Dimensión de Fecha -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Paso 2: La Dimensión de Fecha</h2><p class="text-lg text-gray-400 text-center mb-8">Una práctica fundamental de Kimball. Creamos una tabla `dim_fecha` con atributos de tiempo precalculados (año, mes, trimestre) para acelerar y simplificar las consultas.</p><div class="code-block"><pre><code class="language-sql">CREATE OR REPLACE TABLE dim_fecha (
+  id_fecha DATE NOT NULL,
+  anio INT,
+  mes INT, ...
+);
+ALTER TABLE dim_fecha ADD CONSTRAINT pk_dim_fecha PRIMARY KEY(id_fecha) NOT ENFORCED;</code></pre></div></div></section>
+
+        <!-- Slide 14: Tablas de Hechos -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Paso 3: Crear las Tablas de Hechos</h2><p class="text-lg text-gray-400 text-center mb-8">Las tablas de hechos contienen las métricas de negocio. Las conectamos a las dimensiones declarando sus claves foráneas (`FK`).</p><div class="code-block"><pre><code class="language-sql">CREATE OR REPLACE TABLE pedidos_silver (
+  id_pedido BIGINT NOT NULL,
+  id_usuario BIGINT, -- Clave Foránea
+  id_producto BIGINT, -- Clave Foránea
+  ...
+);
+ALTER TABLE pedidos_silver ADD CONSTRAINT fk_pedidos_usuarios 
+  FOREIGN KEY(id_usuario) REFERENCES usuarios_silver(id_usuario) NOT ENFORCED;</code></pre></div></div></section>
+
+        <!-- Parte 3: El "Cómo" -->
+        <section><div class="content-box text-center"><p class="text-xl text-violet-400 font-bold">Parte 3: El "Cómo" hacerlo Rápido</p><h2 class="text-5xl font-black text-white mt-2 tracking-tight">Optimización Física</h2></div></section>
+
+        <!-- Slide 16: El Problema Oculto: Rendimiento -->
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">El Modelo es Correcto, pero... ¿es Rápido?</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Un modelo lógico perfecto no sirve de nada si las consultas tardan horas. Al escalar a millones de filas, la **organización física** de los datos se vuelve fundamental.</p><p class="text-xl text-gray-200 font-bold bg-red-900/50 p-4 rounded-lg mt-6 border border-red-700">Sin optimización, Databricks se ve forzado a escanear todos los archivos de datos (Full Scan), lo que es lento y costoso.</p></div></section>
+
+        <!-- Slide 17: Particionamiento -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Optimización Macro: Particionamiento</h2><div class="grid md:grid-cols-2 gap-8 items-center"><p class="text-lg text-gray-300">El particionamiento divide físicamente la tabla en subdirectorios. Es la optimización más potente para columnas con **baja cardinalidad** (pocos valores únicos) usadas en filtros.<br><br><b>Estrategia Común:</b> Particionar las tablas de hechos por fecha.</p><div class="code-block"><pre><code class="language-sql">CREATE TABLE pedidos_silver ( ... )
+PARTITIONED BY (id_fecha);
+
+-- Una consulta con este filtro solo leerá
+-- los directorios de Enero 2025.
+SELECT * FROM pedidos_silver
+WHERE id_fecha >= '2025-01-01' AND id_fecha < '2025-02-01';</code></pre></div></div></div></section>
+
+        <!-- Slide 18: Z-Ordering -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Optimización Micro: Z-Ordering</h2><div class="grid md:grid-cols-2 gap-8 items-center"><p class="text-lg text-gray-300">Z-Ordering reorganiza los datos *dentro* de los archivos, agrupando valores relacionados. Es ideal para columnas de **alta cardinalidad** (muchos valores únicos) usadas en `JOINs` o filtros.<br><br><b>Estrategia Común:</b> Aplicar Z-Ordering en las claves primarias y foráneas.</p><div class="code-block"><pre><code class="language-sql">-- Después de insertar los datos...
+OPTIMIZE pedidos_silver
+ZORDER BY (id_usuario, id_producto);
+
+-- Una consulta con este filtro ahora podrá
+-- "saltarse" archivos y bloques de datos
+-- de otros usuarios.
+SELECT * FROM pedidos_silver
+WHERE id_usuario = 1234;</code></pre></div></div></div></section>
+        
+        <!-- Slide 19: Resumen -->
+        <section>
+            <div class="content-box">
+                <h2 class="text-4xl font-bold text-white mb-8 text-center">Resumen del Módulo</h2>
+                <ul class="list-disc list-inside space-y-4 text-xl text-gray-300">
+                    <li>Empezamos con la <b>confianza</b>, entendiendo las garantías ACID y las capacidades de auditoría de Delta Lake.</li>
+                    <li>Luego, diseñamos el <b>plano</b> de nuestra capa Plata usando el modelo dimensional de Kimball.</li>
+                    <li>Finalmente, aprendimos a <b>optimizar</b> ese plano con Particionamiento y Z-Ordering para asegurar un alto rendimiento.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 20: Transición al Taller -->
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-6">¡A Construir!</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Ahora que entendemos el plano (Kimball) y las herramientas de construcción (optimización), es hora de aplicarlo en la práctica.</p><p class="text-xl text-gray-200 font-bold bg-violet-900/50 p-4 rounded-lg mt-6 border border-violet-700">Abramos el cuaderno `sesion_2_bronce_a_plata.ipynb` y construyamos juntos el modelo dimensional optimizado.</p></div></section>
+        
+        <!-- Slide 21: Gracias -->
+        <section><div class="content-box text-center"><h2 class="text-6xl font-black text-white tracking-tight">¡Gracias!</h2></div></section>
+
+    </main>
+    
+    <div class="fixed bottom-8 flex space-x-4 z-10">
+        <button id="prevBtn" class="bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+        <div id="slide-counter" class="text-lg font-bold flex items-center justify-center px-4"></div>
+        <button id="nextBtn" class="bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
+    </div>
+    
+    <script>
+        function drawForceDirectedGraph(containerId, nodes, links, width = 600, height = 400) {
+            d3.select(containerId).select("svg").remove();
+            const svg = d3.select(containerId).append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`);
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(d => d.distance || 150).strength(0.6))
+                .force("charge", d3.forceManyBody().strength(-500))
+                .force("center", d3.forceCenter(width / 2, height / 2));
+
+            const link = svg.append("g").selectAll("line").data(links).join("line")
+                .attr("stroke", d => d.color || "#9ca3af").attr("stroke-opacity", 0.7).attr("stroke-width", 3);
+
+            const node = svg.append("g").selectAll("g").data(nodes).join("g");
+            
+            node.append("rect")
+                .attr("width", d => d.width || 120).attr("height", d => d.height || 50)
+                .attr("x", d => -(d.width || 120) / 2).attr("y", d => -(d.height || 50) / 2)
+                .attr("rx", 10).attr("ry", 10)
+                .attr("fill", d => d.color || "#1f2937").attr("stroke", d => d.stroke || "#a78bfa").attr("stroke-width", 3);
+            
+            node.append("text").attr("text-anchor", "middle").attr("dy", "0.3em")
+                .attr("fill", "white").style("font-size", "12px").style("font-weight", "bold")
+                .text(d => d.id);
+
+            simulation.on("tick", () => {
+                link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+                node.attr("transform", d => `translate(${d.x},${d.y})`);
+            });
+        }
+
+        const kimballNodes = [
+            { id: "Pedidos (Hechos)", color: "#8b5cf6", stroke: "#c4b5fd", width: 150, height: 70 },
+            { id: "Usuarios", color: "#166534", stroke: "#6ee7b7" },
+            { id: "Productos", color: "#166534", stroke: "#6ee7b7" },
+            { id: "Fecha", color: "#166534", stroke: "#6ee7b7" },
+            { id: "Proveedores", color: "#166534", stroke: "#6ee7b7" }
+        ];
+        const kimballLinks = [
+            { source: "Pedidos (Hechos)", target: "Usuarios" },
+            { source: "Pedidos (Hechos)", target: "Productos" },
+            { source: "Pedidos (Hechos)", target: "Fecha" },
+            { source: "Productos", target: "Proveedores", distance: 100 }
+        ];
+
+        const acidNodes = [
+            { id: "ACID", color: "#8b5cf6", stroke: "#c4b5fd", width: 150, height: 70 },
+            { id: "Atomicidad", color: "#166534", stroke: "#6ee7b7" },
+            { id: "Consistencia", color: "#166534", stroke: "#6ee7b7" },
+            { id: "Aislamiento", color: "#166534", stroke: "#6ee7b7" },
+            { id: "Durabilidad", color: "#166534", stroke: "#6ee7b7" }
+        ];
+        const acidLinks = [
+            { source: "ACID", target: "Atomicidad" },
+            { source: "ACID", target: "Consistencia" },
+            { source: "ACID", target: "Aislamiento" },
+            { source: "ACID", target: "Durabilidad" },
+        ];
+
+        const slides = document.querySelectorAll('main > section');
+        let currentSlide = 0;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slide-counter');
+        
+        function drawVisibleDiagram() {
+            const activeSlide = slides[currentSlide];
+            if (!activeSlide) return;
+            const container = activeSlide.querySelector('.diagram-container');
+            if (!container) return;
+            
+            d3.select(container).select("svg").remove();
+            const containerId = `#${container.id}`;
+
+            switch(container.id) {
+                case 'diagram-kimball':
+                    drawForceDirectedGraph(containerId, kimballNodes.map(d => ({...d})), kimballLinks, 500, 450);
+                    break;
+                case 'diagram-acid':
+                    drawForceDirectedGraph(containerId, acidNodes.map(d => ({...d})), acidLinks, 500, 450);
+                    break;
+            }
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === slides.length - 1;
+            slideCounter.textContent = `${index + 1} / ${slides.length}`;
+            drawVisibleDiagram();
+        }
+        
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } });
+        nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } });
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextBtn.click(); 
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevBtn.click();
+            }
+        });
+        
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>

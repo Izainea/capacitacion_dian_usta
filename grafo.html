@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo: Bases de Datos de Grafos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        section { display: none; animation: fadeIn 0.5s; }
+        section.active { display: block; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: scale(0.98); } 
+            to { opacity: 1; transform: scale(1); } 
+        }
+        .diagram-container {
+            min-height: 350px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <a href="index.html" class="absolute top-4 left-4 bg-gray-700 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-all z-20">🏠 Inicio</a>
+    
+    <main class="w-full max-w-6xl mx-auto">
+        <!-- Slide 1: Título -->
+        <section>
+            <div class="bg-gray-800 p-12 rounded-2xl shadow-xl text-center border-t-8 border-lime-500">
+                <h2 class="text-5xl font-black text-white mb-4 tracking-tight">Bases de Datos de Grafos</h2>
+                <p class="text-2xl text-lime-300"><b>Conectando los Puntos: El Poder de las Relaciones</b></p>
+            </div>
+        </section>
+
+        <!-- Slide 2: El Problema que Resuelven -->
+        <section>
+            <div class="bg-gray-800 p-8 rounded-2xl shadow-xl border-t-8 border-lime-500">
+                <h2 class="text-3xl font-bold text-lime-300 mb-6">El Problema: Las Relaciones Complejas</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="text-xl text-gray-300 mb-4">Pregunta simple: En una red social, ¿cómo encuentras a los "amigos de tus amigos"?</p>
+                        <ul class="list-disc list-inside space-y-4 text-lg text-gray-400">
+                            <li><b>En SQL:</b> Requeriría múltiples `JOIN`s de una tabla consigo misma (`SELF JOIN`). A medida que la pregunta se vuelve más compleja ("amigos de amigos de amigos"), la consulta se vuelve exponencialmente lenta y difícil de escribir.</li>
+                            <li><b>El Desafío:</b> Las bases de datos relacionales están optimizadas para unir datos entre tablas, no para navegar redes profundas y complejas de relaciones.</li>
+                        </ul>
+                    </div>
+                    <div id="diagram-sql-pain" class="bg-gray-900 p-4 rounded-lg flex justify-center items-center diagram-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: El Modelo de Grafos -->
+        <section>
+             <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl border-t-8 border-lime-500">
+                <h2 class="text-3xl font-bold text-lime-300 mb-6">La Solución: El Modelo de Grafos</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="text-lg text-gray-300 mb-4">Las bases de datos de grafos no piensan en tablas, piensan en redes. Su modelo se basa en dos componentes principales:</p>
+                        <ul class="list-disc list-inside space-y-2 text-lg text-gray-400">
+                            <li><b>Nodos (o Vértices):</b> Representan las entidades. Son las "cosas" de nuestro universo (Personas, Productos, Empresas).</li>
+                            <li><b>Relaciones (o Aristas):</b> Representan la conexión y el contexto entre los nodos. Son los "verbos" que unen a las cosas (es `AMIGO_DE`, `COMPRÓ`, `TRABAJA_EN`).</li>
+                            <li><b>Propiedades:</b> Tanto los nodos como las relaciones pueden tener propiedades (atributos), como el nombre de una persona o la fecha de una compra.</li>
+                        </ul>
+                    </div>
+                    <div id="diagram-graph-model" class="bg-gray-900 p-4 rounded-lg flex justify-center items-center diagram-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: El Superpoder -->
+        <section>
+             <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl border-t-8 border-lime-500">
+                <h2 class="text-3xl font-bold text-lime-300 mb-6">El Superpoder: "Index-Free Adjacency"</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="text-lg text-gray-300 mb-4">¿Por qué son tan rápidas? A diferencia de SQL, que tiene que buscar en índices masivos para encontrar la siguiente conexión, en una base de datos de grafos cada nodo tiene **punteros físicos directos** a sus relaciones y nodos vecinos.</p>
+                        <p class="text-lg text-gray-400">Navegar de un nodo a otro es una operación de acceso directo a memoria, casi instantánea. La velocidad de la consulta **no depende del tamaño total de la base de datos**, sino solo de la porción del grafo que estás explorando.</p>
+                    </div>
+                    <div id="diagram-graph-speed" class="bg-gray-900 p-4 rounded-lg flex justify-center items-center diagram-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Casos de Uso Ideales -->
+        <section>
+            <div class="bg-gray-800 p-12 rounded-2xl shadow-xl border-t-8 border-lime-500">
+                <h2 class="text-4xl font-bold text-lime-300 mb-8 text-center">Casos de Uso Ideales</h2>
+                <div class="grid md:grid-cols-3 gap-8 text-lg">
+                    <div class="bg-gray-700 p-6 rounded-lg text-center">
+                        <div class="text-3xl mb-3">🤝</div>
+                        <h3 class="text-xl font-bold text-white mb-2">Redes Sociales y Gestión de Identidad</h3>
+                        <p class="text-gray-400">Analizar conexiones, encontrar influencers, gestionar jerarquías organizacionales.</p>
+                    </div>
+                    <div class="bg-gray-700 p-6 rounded-lg text-center">
+                        <div class="text-3xl mb-3">💡</div>
+                        <h3 class="text-xl font-bold text-white mb-2">Sistemas de Recomendación</h3>
+                        <p class="text-gray-400">"Clientes que compraron X también compraron Y". "Personas que sigues también siguen a Z".</p>
+                    </div>
+                    <div class="bg-gray-700 p-6 rounded-lg text-center">
+                        <div class="text-3xl mb-3">🛡️</div>
+                        <h3 class="text-xl font-bold text-white mb-2">Detección de Fraude</h3>
+                        <p class="text-gray-400">Identificar patrones complejos y anillos de fraude que son casi imposibles de ver en un modelo tabular.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Ejemplos Populares -->
+        <section>
+             <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl border-t-8 border-lime-500">
+                <h2 class="text-3xl font-bold text-lime-300 mb-6">Ejemplos Populares en la Industria</h2>
+                <div class="grid md:grid-cols-2 gap-8 text-lg">
+                    <div class="bg-gray-700 p-6 rounded-lg">
+                        <h3 class="text-2xl font-bold text-white mb-3">Neo4j</h3>
+                        <p class="text-gray-400 mb-3">La base de datos de grafos nativa más popular y madura del mercado. Utiliza el lenguaje de consulta Cypher, que es muy declarativo e intuitivo.</p>
+                    </div>
+                    <div class="bg-gray-700 p-6 rounded-lg">
+                        <h3 class="text-2xl font-bold text-white mb-3">Azure Cosmos DB (API Gremlin)</h3>
+                        <p class="text-gray-400 mb-3">Como vimos, Cosmos DB es multi-modelo. Al provisionarlo con la API Gremlin, se convierte en una base de datos de grafos distribuida y totalmente gestionada.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <div class="fixed bottom-8 flex space-x-4 z-10">
+        <button id="prevBtn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+        <button id="nextBtn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
+    </div>
+    
+    <script>
+        function drawForceDirectedGraph(containerId, nodes, links, width = 400, height = 350) {
+            d3.select(containerId).select("svg").remove();
+            const svg = d3.select(containerId).append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`);
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(d => d.distance || 80))
+                .force("charge", d3.forceManyBody().strength(-200))
+                .force("center", d3.forceCenter(width / 2, height / 2));
+            
+            const link = svg.append("g").selectAll("line").data(links).join("line")
+                .attr("stroke", d => d.color || "#9ca3af").attr("stroke-opacity", 0.8).attr("stroke-width", 2);
+
+            const linkText = svg.append("g").selectAll("text").data(links).join("text")
+                .attr("fill", "#a7f3d0").style("font-size", "10px").text(d => d.label || "");
+
+            const node = svg.append("g").selectAll("g").data(nodes).join("g");
+            node.append("circle").attr("r", d => d.radius || 25).attr("fill", d => d.color || "#86efac");
+            node.append("text").attr("text-anchor", "middle").attr("dy", "0.3em").attr("fill", "black").style("font-size", "12px").style("font-weight", "bold").text(d => d.id);
+            
+            simulation.on("tick", () => {
+                link.attr("x1", d => d.source.x).attr("y1", d => d.source.y).attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+                node.attr("transform", d => `translate(${d.x},${d.y})`);
+                linkText.attr("x", d => (d.source.x + d.target.x) / 2).attr("y", d => (d.source.y + d.target.y) / 2);
+            });
+        }
+
+        const sqlPainNodes = [ { id: "Tú" }, { id: "Amigo 1" }, { id: "Amigo 2" }, { id: "Amigo de Amigo" } ];
+        const sqlPainLinks = [ { source: "Tú", target: "Amigo 1" }, { source: "Tú", target: "Amigo 2" }, { source: "Amigo 1", target: "Amigo de Amigo" } ];
+        
+        const graphModelNodes = [ { id: "Ana", color: "#bef264" }, { id: "Juan", color: "#bef264" }, { id: "SQL Corp", color: "#a5b4fc" } ];
+        const graphModelLinks = [ { source: "Ana", target: "Juan", label: "AMIGO_DE" }, { source: "Ana", target: "SQL Corp", label: "TRABAJA_EN" }, { source: "Juan", target: "SQL Corp", label: "TRABAJA_EN" } ];
+
+        const graphSpeedNodes = [ { id: "Ana" }, { id: "Juan" } ];
+        const graphSpeedLinks = [ { source: "Ana", target: "Juan", label: "Puntero Directo", color: "#5eead4" } ];
+
+        const slides = document.querySelectorAll('main > section'); 
+        let currentSlide = 0;
+        const prevBtn = document.getElementById('prevBtn'); 
+        const nextBtn = document.getElementById('nextBtn');
+        
+        function drawVisibleDiagram() {
+            const activeSlide = slides[currentSlide];
+            if (!activeSlide) return;
+            const container = activeSlide.querySelector('.diagram-container');
+            if (!container) return;
+            d3.select(container).select("svg").remove();
+            
+            switch (container.id) {
+                case 'diagram-sql-pain': drawForceDirectedGraph(`#${container.id}`, sqlPainNodes, sqlPainLinks); break;
+                case 'diagram-graph-model': drawForceDirectedGraph(`#${container.id}`, graphModelNodes, graphModelLinks, 400, 300); break;
+                case 'diagram-graph-speed': drawForceDirectedGraph(`#${container.id}`, graphSpeedNodes, graphSpeedLinks, 400, 300); break;
+            }
+        }
+
+        function showSlide(index) { 
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index)); 
+            prevBtn.disabled = index === 0;
+            prevBtn.classList.toggle('opacity-50', index === 0);
+            nextBtn.disabled = index === slides.length - 1;
+            nextBtn.classList.toggle('opacity-50', index === slides.length - 1);
+            drawVisibleDiagram();
+        }
+        
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } });
+        nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } });
+        document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') nextBtn.click(); else if (e.key === 'ArrowLeft') prevBtn.click(); });
+        
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>
