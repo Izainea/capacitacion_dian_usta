@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repaso de SQL: El Lenguaje de los Datos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #111827; /* bg-gray-900 */
+        }
+        section { 
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out; 
+            width: 100%;
+        }
+        section.active { 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .diagram-container { 
+            min-height: 450px; 
+            width: 100%; 
+        }
+        .content-box {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-top: 8px solid #06b6d4; /* border-cyan-500 */
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            width: 100%;
+        }
+        .code-block {
+            background-color: #0d1117;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            border: 1px solid #30363d;
+        }
+    </style>
+</head>
+<body class="text-white flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <main class="w-full max-w-6xl mx-auto">
+        <!-- Slide 1: Título -->
+        <section><div class="content-box text-center"><h2 class="text-5xl font-black text-white mb-4 tracking-tight">Un Repaso a SQL</h2><p class="text-2xl text-gray-300"><b>El Lenguaje Universal de los Datos</b></p></div></section>
+
+        <!-- Slide 2: ¿Qué es SQL? -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">¿Qué es SQL?</h2><div class="grid md:grid-cols-2 gap-8 items-center text-lg"><p class="text-gray-300">SQL (<b>S</b>tructured <b>Q</b>uery <b>L</b>anguage) es el lenguaje estándar para comunicarse con bases de datos relacionales. <br><br>Es un lenguaje <b>declarativo</b>: en lugar de decirle a la base de datos *cómo* hacer algo (paso a paso), simplemente le *declaramos* qué resultado queremos obtener.</p><div class="code-block"><pre><code class="language-sql">-- Yo declaro que quiero esto:
+SELECT nombre, ciudad
+FROM usuarios
+WHERE fecha_registro > '2024-01-01';
+
+-- El motor de la base de datos se encarga
+-- de encontrar la forma más eficiente de
+-- conseguirlo.</code></pre></div></div></div></section>
+
+        <!-- Slide 3: Los Sublenguajes -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Los 4 Sublenguajes de SQL</h2><p class="text-lg text-gray-400 text-center mb-8">SQL se divide en cuatro componentes lógicos según la intención del comando.</p><div id="diagram-sublanguages" class="diagram-container"></div></div></section>
+
+        <!-- Slide 4: ¿Cómo se empieza? -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">El Flujo de Trabajo Básico</h2><div class="grid md:grid-cols-3 gap-6 text-center"><div class="bg-gray-700/50 p-6 rounded-lg border border-gray-600"><div class="text-3xl mb-3">1️⃣</div><h3 class="text-xl font-bold text-cyan-300 mb-2">Definir (DDL)</h3><p class="text-gray-400">Creas la estructura de tus tablas con `CREATE TABLE`.</p></div><div class="bg-gray-700/50 p-6 rounded-lg border border-gray-600"><div class="text-3xl mb-3">2️⃣</div><h3 class="text-xl font-bold text-cyan-300 mb-2">Manipular (DML)</h3><p class="text-gray-400">Pueblas las tablas con datos usando `INSERT`.</p></div><div class="bg-gray-700/50 p-6 rounded-lg border border-gray-600"><div class="text-3xl mb-3">3️⃣</div><h3 class="text-xl font-bold text-cyan-300 mb-2">Consultar (DQL)</h3><p class="text-gray-400">Haces preguntas a tus datos con `SELECT`.</p></div></div></div></section>
+
+        <!-- Slide 5: Importancia -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">¿Por Qué es tan Importante?</h2><ul class="list-disc list-inside space-y-4 text-xl text-gray-300"><li><b>Es Universal:</b> Es el estándar de facto. Prácticamente todos los sistemas de datos, desde aplicaciones móviles hasta data warehouses masivos, lo entienden.</li><li><b>Es Poderoso:</b> Permite realizar transformaciones y agregaciones de datos complejas de forma concisa y eficiente.</li><li><b>Es la Base:</b> Es el pilar sobre el que se construyen la mayoría de los roles de datos: analistas, ingenieros, científicos y arquitectos.</li></ul></div></section>
+
+        <!-- Slide 6: SQL y Diseño Relacional -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Matrimonio Perfecto: SQL y el Diseño Relacional</h2><div class="grid md:grid-cols-2 gap-8 items-center"><p class="text-lg text-gray-300">SQL no fue diseñado en un vacío; fue creado específicamente para operar sobre el <b>modelo relacional</b>. La sintaxis de SQL refleja directamente los conceptos de este modelo: <br><br> `SELECT` opera sobre columnas. <br> `FROM` opera sobre tablas (relaciones). <br> `WHERE` opera sobre filas (tuplas). <br><br> El comando <b>`JOIN`</b> es la pieza clave que permite explotar el poder de las relaciones definidas por las claves, uniendo tablas para reconstruir la información de negocio.</p><div id="diagram-join" class="diagram-container"></div></div></div></section>
+
+        <!-- Slide 7: La Evolución -->
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">La Evolución de los Datos Exigió una Evolución de SQL</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">A medida que los datos pasaron de bases de datos operacionales a Data Warehouses y Data Lakehouses, SQL tuvo que adaptarse para gestionar nuevos desafíos como el versionado, la auditoría y la optimización física a gran escala.</p></div></section>
+
+        <!-- Slide 8: Extensiones de Databricks -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Las Extensiones de Databricks (Delta SQL)</h2><p class="text-lg text-gray-400 text-center mb-8">Plataformas como Databricks no reinventaron SQL. En su lugar, lo **extendieron** con nuevos comandos que encajan en los sublenguajes existentes para manejar las capacidades únicas de Delta Lake.</p><div class="text-center text-xl font-bold bg-cyan-900/50 p-4 rounded-lg mt-6 border border-cyan-700">No es un lenguaje nuevo, es el mismo SQL con superpoderes.</div></div></section>
+
+        <!-- Slide 9: Extensión 1 -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Extensión DQL: `DESCRIBE HISTORY`</h2><p class="text-lg text-gray-400 text-center mb-8">Este comando extiende el DQL (lenguaje de consulta) para permitirnos hacer preguntas sobre los **metadatos** y el log de transacciones de una tabla.</p><div class="code-block"><pre><code class="language-sql">-- Preguntamos por el historial de cambios de la tabla.
+-- La intención es CONSULTAR, por lo tanto es DQL.
+DESCRIBE HISTORY mi_tabla;</code></pre></div></div></section>
+
+        <!-- Slide 10: Extensión 2 -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Extensión DDL: `OPTIMIZE` y `ZORDER`</h2><p class="text-lg text-gray-400 text-center mb-8">Estos comandos extienden el DDL (lenguaje de definición) para gestionar la **estructura física** de los datos, algo que no existía en el SQL tradicional.</p><div class="code-block"><pre><code class="language-sql">-- Modificamos la organización física de los archivos de la tabla.
+-- La intención es DEFINIR la estructura, por lo tanto es DDL.
+OPTIMIZE mi_tabla ZORDER BY (columna_id);</code></pre></div></div></section>
+
+        <!-- Slide 11: Extensión 3 -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Extensión DML: `RESTORE`</h2><p class="text-lg text-gray-400 text-center mb-8">Este comando extiende el DML (lenguaje de manipulación) para permitirnos modificar los datos a nivel de versiones.</p><div class="code-block"><pre><code class="language-sql">-- Revertimos los datos de la tabla a un estado anterior.
+-- La intención es MANIPULAR las filas, por lo tanto es DML.
+RESTORE TABLE mi_tabla TO VERSION AS OF 5;</code></pre></div></div></section>
+
+        <!-- Slide 12: ¿Por qué son importantes? -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">¿Por Qué son tan Importantes estas Extensiones?</h2><p class="text-lg text-gray-300 text-center">Porque convierten a SQL en el lenguaje del **Data Lakehouse moderno**.</p><div class="grid md:grid-cols-3 gap-6 text-center mt-8"><div class="bg-gray-700/50 p-6 rounded-lg"><h3 class="text-xl font-bold text-cyan-300 mb-2">Añaden Fiabilidad</h3><p class="text-gray-400">Permiten gestionar las transacciones ACID.</p></div><div class="bg-gray-700/50 p-6 rounded-lg"><h3 class="text-xl font-bold text-cyan-300 mb-2">Añaden Auditabilidad</h3><p class="text-gray-400">Permiten consultar el historial y viajar en el tiempo.</p></div><div class="bg-gray-700/50 p-6 rounded-lg"><h3 class="text-xl font-bold text-cyan-300 mb-2">Añaden Rendimiento</h3><p class="text-gray-400">Permiten gestionar la optimización física de los datos.</p></div></div></div></section>
+
+        <!-- Slide 13: Conclusión -->
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-6">Conclusión</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">SQL sigue siendo el rey. Es un lenguaje vivo que ha evolucionado junto con los sistemas de datos. Dominar tanto sus fundamentos relacionales como sus extensiones modernas es la habilidad más importante para cualquier profesional de datos hoy en día.</p></div></section>
+
+        <!-- Slide 14: Gracias -->
+        <section><div class="content-box text-center"><h2 class="text-6xl font-black text-white tracking-tight">¡Gracias!</h2></div></section>
+
+    </main>
+    
+    <div class="fixed bottom-8 flex space-x-4 z-10">
+        <button id="prevBtn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+        <div id="slide-counter" class="text-lg font-bold flex items-center justify-center px-4"></div>
+        <button id="nextBtn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
+    </div>
+    
+    <script>
+        function drawForceDirectedGraph(containerId, nodes, links, width = 600, height = 400) {
+            d3.select(containerId).select("svg").remove();
+            const svg = d3.select(containerId).append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`);
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(d => d.distance || 150).strength(0.6))
+                .force("charge", d3.forceManyBody().strength(-600))
+                .force("center", d3.forceCenter(width / 2, height / 2));
+
+            const link = svg.append("g").selectAll("line").data(links).join("line")
+                .attr("stroke", d => d.color || "#9ca3af").attr("stroke-opacity", 0.7).attr("stroke-width", 3);
+
+            const node = svg.append("g").selectAll("g").data(nodes).join("g");
+            
+            node.append("rect")
+                .attr("width", d => d.width || 140).attr("height", d => d.height || 60)
+                .attr("x", d => -(d.width || 140) / 2).attr("y", d => -(d.height || 60) / 2)
+                .attr("rx", 10).attr("ry", 10)
+                .attr("fill", d => d.color || "#1f2937").attr("stroke", d => d.stroke || "#22d3ee").attr("stroke-width", 3);
+            
+            node.append("text").attr("text-anchor", "middle").attr("dy", "0.3em")
+                .attr("fill", "white").style("font-size", "14px").style("font-weight", "bold")
+                .text(d => d.id);
+
+            simulation.on("tick", () => {
+                link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+                node.attr("transform", d => `translate(${d.x},${d.y})`);
+            });
+        }
+
+        const sublanguageNodes = [
+            { id: "SQL", color: "#06b6d4", stroke: "#67e8f9", width: 160, height: 70 },
+            { id: "DQL\n(Consultar)", color: "#166534", stroke: "#6ee7b7" },
+            { id: "DML\n(Manipular)", color: "#166534", stroke: "#6ee7b7" },
+            { id: "DDL\n(Definir)", color: "#166534", stroke: "#6ee7b7" },
+            { id: "DCL\n(Controlar)", color: "#166534", stroke: "#6ee7b7" }
+        ];
+        const sublanguageLinks = [
+            { source: "SQL", target: "DQL\n(Consultar)" },
+            { source: "SQL", target: "DML\n(Manipular)" },
+            { source: "SQL", target: "DDL\n(Definir)" },
+            { source: "SQL", target: "DCL\n(Controlar)" },
+        ];
+
+        const joinNodes = [
+            { id: "Usuarios", color: "#1f2937", stroke: "#6ee7b7" },
+            { id: "Pedidos", color: "#1f2937", stroke: "#6ee7b7" },
+            { id: "JOIN", color: "#9333ea", stroke: "#c4b5fd", width: 80, height: 80 }
+        ];
+        const joinLinks = [
+            { source: "Usuarios", target: "JOIN" },
+            { source: "Pedidos", target: "JOIN" }
+        ];
+
+        const slides = document.querySelectorAll('main > section');
+        let currentSlide = 0;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slide-counter');
+        
+        function drawVisibleDiagram() {
+            const activeSlide = slides[currentSlide];
+            if (!activeSlide) return;
+            const container = activeSlide.querySelector('.diagram-container');
+            if (!container) return;
+            
+            d3.select(container).select("svg").remove();
+            const containerId = `#${container.id}`;
+
+            switch(container.id) {
+                case 'diagram-sublanguages':
+                    drawForceDirectedGraph(containerId, sublanguageNodes.map(d => ({...d})), sublanguageLinks, 600, 450);
+                    break;
+                case 'diagram-join':
+                    drawForceDirectedGraph(containerId, joinNodes.map(d => ({...d})), joinLinks, 500, 450);
+                    break;
+            }
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === slides.length - 1;
+            slideCounter.textContent = `${index + 1} / ${slides.length}`;
+            drawVisibleDiagram();
+        }
+        
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } });
+        nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } });
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextBtn.click(); 
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevBtn.click();
+            }
+        });
+        
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>
