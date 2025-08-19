@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 3: Optimizando Consultas con Planes de Ejecución</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #111827; /* bg-gray-900 */
+        }
+        section { 
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out; 
+            width: 100%;
+        }
+        section.active { 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .diagram-container { 
+            min-height: 450px; 
+            width: 100%; 
+        }
+        .content-box {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-top: 8px solid #8b5cf6; /* border-violet-500 */
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            width: 100%;
+        }
+         .code-block {
+            background-color: #0d1117;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            border: 1px solid #30363d;
+        }
+    </style>
+</head>
+<body class="text-white flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <main class="w-full max-w-6xl mx-auto">
+        <!-- Slide 1: Título -->
+        <section><div class="content-box text-center"><h2 class="text-5xl font-black text-white mb-4 tracking-tight">Optimizando Consultas</h2><p class="text-2xl text-gray-300"><b>Módulo 3: Entendiendo los Planes de Ejecución</b></p></div></section>
+
+        <!-- Slide 2: Agenda -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Nuestra Misión en este Módulo</h2><ol class="list-decimal list-inside space-y-4 text-xl text-gray-300"><li><b>El Problema:</b> ¿Por qué nuestras consultas se vuelven lentas?</li><li><b>El Diagnóstico:</b> Entender el "cerebro" de Spark y su plan de ataque.</li><li><b>Las Soluciones:</b> Aplicar optimizaciones a nivel de directorios, archivos y algoritmos.</li><li><b>El Mantenimiento:</b> Asegurar que el rendimiento se mantenga en el tiempo.</li></ol></div></section>
+
+        <!-- Slide 3: El Problema -->
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">El Enemigo: El "Full Table Scan"</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">A medida que nuestros datos crecen, las consultas simples se ralentizan. La causa principal es que, por defecto, Spark se ve obligado a leer **cada fila y cada columna** de una tabla para encontrar lo que busca.</p><p class="text-xl text-gray-200 font-bold bg-red-900/50 p-4 rounded-lg mt-6 border border-red-700">Nuestro objetivo es darle a Spark la información que necesita para evitar este trabajo innecesario.</p></div></section>
+
+        <!-- Slide 4: El Diagnóstico -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Diagnóstico: `EXPLAIN`</h2><p class="text-lg text-gray-400 text-center mb-8">Antes de optimizar, debemos diagnosticar. El comando `EXPLAIN` es nuestra herramienta de Rayos X: nos muestra el **Plan de Ejecución** que Spark ha decidido seguir, sin ejecutar la consulta.</p><p class="text-lg text-gray-300 text-center">No miramos el plan para ver el código, sino para buscar **pistas** sobre el comportamiento de Spark, como por ejemplo:</p><ul class="list-disc list-inside space-y-2 text-center text-gray-400 mt-4 mx-auto max-w-md"><li>¿Está leyendo toda la tabla?</li><li>¿Está usando nuestras particiones?</li><li>¿Qué estrategia de JOIN ha elegido?</li></ul></div></section>
+
+        <!-- Slide 5: El Cerebro -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Cerebro: Optimizador Catalyst</h2><p class="text-lg text-gray-400 text-center mb-8">Una consulta pasa por un complejo proceso de optimización antes de ejecutarse. Catalyst la transforma de una simple idea a un plan de ataque altamente eficiente.</p><div class="flex justify-center"><img src="plan_ejecucion.png" alt="Diagrama del Plan de Ejecución de Spark" class="rounded-lg bg-white p-2"></div></div></section>
+
+        <!-- Slide 6: Solución 1 -->
+        <section><div class="content-box text-center"><p class="text-xl text-violet-400 font-bold">Solución Nivel 1: Optimización a Nivel de Directorios</p><h2 class="text-5xl font-black text-white mt-2 tracking-tight">Particionamiento</h2></div></section>
+
+        <!-- Slide 7: Particionamiento Explicado -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">¿Qué es el Particionamiento?</h2><p class="text-lg text-gray-400 text-center mb-8">Es como organizar un archivador gigante en cajones separados por fecha. En lugar de buscar en todo el archivador, vas directamente al cajón correcto.</p><div class="text-center bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-cyan-300 mb-3">Directory Skipping (Salto de Directorios)</h3><p class="text-gray-300">Cuando filtramos por la columna de partición (ej. `WHERE id_fecha = '2023-01-15'`), Spark ignora físicamente todos los demás directorios. La prueba en el plan `EXPLAIN` es la presencia de **`PartitionFilters`**.</p></div></div></section>
+        
+        <!-- Slide 8: Solución 2 -->
+        <section><div class="content-box text-center"><p class="text-xl text-violet-400 font-bold">Solución Nivel 2: Optimización a Nivel de Archivos</p><h2 class="text-5xl font-black text-white mt-2 tracking-tight">Z-Ordering</h2></div></section>
+
+        <!-- Slide 9: Z-Ordering Explicado -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">¿Qué es el Z-Ordering?</h2><p class="text-lg text-gray-400 text-center mb-8">Continuando la analogía: una vez que abrimos el cajón correcto (la partición), el Z-Ordering es como tener los documentos adentro perfectamente ordenados por cliente.</p><div class="text-center bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-yellow-300 mb-3">File Skipping (Salto de Archivos)</h3><p class="text-gray-300">Spark utiliza las estadísticas (min/max) de cada archivo para saber si necesita abrirlo. Al filtrar por `id_usuario`, puede ignorar la mayoría de los archivos dentro de una partición, reduciendo drásticamente la lectura.</p></div></div></section>
+        
+        <!-- Slide 10: Solución 3 -->
+        <section><div class="content-box text-center"><p class="text-xl text-violet-400 font-bold">Solución Nivel 3: Optimización de Algoritmos</p><h2 class="text-5xl font-black text-white mt-2 tracking-tight">Estrategias de JOIN</h2></div></section>
+
+        <!-- Slide 11: Estrategias de JOIN -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">El Arte de Conectar Datos</h2><div id="diagram-join" class="diagram-container"></div></div></section>
+        
+        <!-- Slide 12: AQE -->
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">El Director de Orquesta: AQE</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">La **Ejecución Adaptativa de Consultas (AQE)** es la capacidad de Spark para cambiar su estrategia de JOIN a mitad de la ejecución si los datos reales no coinciden con sus estimaciones, garantizando casi siempre el plan más óptimo.</p><p class="text-xl text-gray-200 font-bold bg-green-900/50 p-4 rounded-lg mt-6 border border-green-700">Vemos su presencia en el plan con el operador `AdaptiveSparkPlan`.</p></div></section>
+
+        <!-- Slide 13: Mantenimiento -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Mantenimiento: Mantener la Velocidad</h2><p class="text-lg text-gray-400 text-center mb-8">Las optimizaciones no son estáticas. Para que Spark siga tomando buenas decisiones, debemos mantener nuestras tablas.</p><div class="grid md:grid-cols-2 gap-8"><div class="bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-cyan-300 mb-3">`OPTIMIZE`</h3><p class="text-gray-300">Es como "ordenar y limpiar" nuestro archivador. Compacta archivos pequeños y aplica el Z-Ordering.</p></div><div class="bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-green-300 mb-3">`ANALYZE TABLE`</h3><p class="text-gray-300">Es como "hacer un inventario". Recolecta estadísticas para que Spark sepa el tamaño y la distribución de los datos.</p></div></div></div></section>
+        
+        <!-- Slide 14: Poniéndolo todo junto -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Poniéndolo todo Junto</h2><p class="text-lg text-gray-400 text-center mb-8">Imagina la solicitud: "Los 5 productos más devueltos por clientes de 'Bogotá D.C.' en la primera semana de Febrero de 2023."</p><div class="text-left bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-violet-300 mb-3">Una consulta optimizada...</h3><ol class="list-decimal list-inside space-y-2 text-gray-300"><li>Añade `WHERE id_fecha BETWEEN '2023-02-01' AND '2023-02-07'`.</li><li>**Resultado:** Spark usa **Particionamiento** para leer solo 7 días de datos en lugar de años.</li><li>**Resultado:** Dentro de esas particiones, el **Z-Ordering** ayuda a encontrar rápidamente los datos de los pedidos devueltos.</li><li>**Resultado:** Al unir con `usuarios`, Spark elige un **Broadcast Join** porque la tabla de usuarios es pequeña.</li></ol><p class="mt-4 text-center font-bold text-white">¡Múltiples optimizaciones trabajando en conjunto para una respuesta rápida!</p></div></div></section>
+
+        <!-- Slide 15: Resumen -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Resumen del Módulo</h2><ul class="list-disc list-inside space-y-4 text-xl text-gray-300"><li>El rendimiento no es magia, es **diseño y mantenimiento**.</li><li>Usamos **`EXPLAIN`** para diagnosticar y verificar, no para adivinar.</li><li>Optimizamos en capas: **Particionamiento** (directorios), **Z-Ordering** (archivos) y **Estrategias de JOIN** (algoritmos).</li><li>**AQE** es nuestra red de seguridad, adaptándose a la realidad de los datos.</li><li>Mantener las **estadísticas actualizadas** con `ANALYZE` es crucial.</li></ul></div></section>
+
+        <!-- Slide 16: Gracias -->
+        <section><div class="content-box text-center"><h2 class="text-6xl font-black text-white tracking-tight">¡Gracias!</h2><p class="text-xl text-gray-300 mt-4">Preguntas y Siguientes Pasos</p></div></section>
+
+    </main>
+    
+    <div class="fixed bottom-8 flex space-x-4 z-10">
+        <button id="prevBtn" class="bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+        <div id="slide-counter" class="text-lg font-bold flex items-center justify-center px-4"></div>
+        <button id="nextBtn" class="bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
+    </div>
+    
+    <script>
+        function drawJoinDiagram(containerId) {
+            const width = 800, height = 450;
+            d3.select(containerId).select("svg").remove();
+            const svg = d3.select(containerId).append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`);
+
+            // Títulos
+            svg.append("text").attr("x", width / 4).attr("y", 40).text("Broadcast Hash Join (BHJ)").attr("text-anchor", "middle").attr("fill", "white").style("font-size", "18px").style("font-weight", "bold");
+            svg.append("text").attr("x", 3 * width / 4).attr("y", 40).text("Shuffle Sort Merge Join (SMJ)").attr("text-anchor", "middle").attr("fill", "white").style("font-size", "18px").style("font-weight", "bold");
+            
+            svg.append("text").attr("x", width / 4).attr("y", 65).text("Ideal para: Tabla Pequeña + Tabla Grande").attr("text-anchor", "middle").attr("fill", "#a5b4fc").style("font-size", "12px");
+            svg.append("text").attr("x", 3 * width / 4).attr("y", 65).text("Ideal para: Dos Tablas Grandes").attr("text-anchor", "middle").attr("fill", "#a5b4fc").style("font-size", "12px");
+
+
+            // BHJ
+            const bhjX = width / 4;
+            svg.append("rect").attr("x", bhjX - 75).attr("y", 100).attr("width", 150).attr("height", 100).attr("fill", "#374151").attr("stroke", "#6ee7b7").attr("rx", 5);
+            svg.append("text").attr("x", bhjX).attr("y", 150).text("Tabla Grande").attr("text-anchor", "middle").attr("fill", "white");
+            
+            svg.append("rect").attr("x", bhjX - 50).attr("y", 250).attr("width", 100).attr("height", 40).attr("fill", "#374151").attr("stroke", "#fde047").attr("rx", 5);
+            svg.append("text").attr("x", bhjX).attr("y", 275).text("Tabla Pequeña").attr("text-anchor", "middle").attr("fill", "white");
+            
+            svg.append("path").attr("d", `M ${bhjX} 290 V 330`).attr("stroke", "#fde047").attr("stroke-width", 2).attr("marker-end", "url(#arrow-yellow)");
+            svg.append("text").attr("x", bhjX + 15).attr("y", 315).text("Broadcast (Copia)").attr("fill", "#fde047").attr("text-anchor", "start");
+            
+            svg.append("rect").attr("x", bhjX - 85).attr("y", 350).attr("width", 170).attr("height", 60).attr("fill", "#1f2937").attr("stroke", "#8b5cf6").attr("rx", 5);
+            svg.append("text").attr("x", bhjX).attr("y", 385).text("JOIN Local (Sin Shuffle)").attr("text-anchor", "middle").attr("fill", "white").style("font-weight", "bold");
+
+            // SMJ
+            const smjX = 3 * width / 4;
+            svg.append("rect").attr("x", smjX - 75).attr("y", 100).attr("width", 150).attr("height", 40).attr("fill", "#374151").attr("stroke", "#6ee7b7").attr("rx", 5);
+            svg.append("text").attr("x", smjX).attr("y", 125).text("Tabla Grande A").attr("text-anchor", "middle").attr("fill", "white");
+            svg.append("rect").attr("x", smjX - 75).attr("y", 160).attr("width", 150).attr("height", 40).attr("fill", "#374151").attr("stroke", "#6ee7b7").attr("rx", 5);
+            svg.append("text").attr("x", smjX).attr("y", 185).text("Tabla Grande B").attr("text-anchor", "middle").attr("fill", "white");
+            
+            svg.append("path").attr("d", `M ${smjX - 40} 200 V 240 L ${smjX + 40} 240 L ${smjX + 40} 200 M ${smjX + 40} 240 L ${smjX - 40} 240 L ${smjX - 40} 200 `).attr("stroke", "#fb923c").attr("stroke-width", 2).attr("fill", "none");
+            svg.append("text").attr("x", smjX).attr("y", 225).text("Shuffle (Costoso)").attr("text-anchor", "middle").attr("fill", "#fb923c").style("font-weight", "bold");
+            
+            svg.append("rect").attr("x", smjX - 75).attr("y", 260).attr("width", 150).attr("height", 40).attr("fill", "#1f2937").attr("stroke", "#fb923c").attr("rx", 5);
+            svg.append("text").attr("x", smjX).attr("y", 285).text("Sort + Merge").attr("text-anchor", "middle").attr("fill", "white");
+            
+            svg.append("path").attr("d", `M ${smjX} 300 V 330`).attr("stroke", "#8b5cf6").attr("stroke-width", 2).attr("marker-end", "url(#arrow-violet)");
+            
+            svg.append("rect").attr("x", smjX - 75).attr("y", 350).attr("width", 150).attr("height", 60).attr("fill", "#1f2937").attr("stroke", "#8b5cf6").attr("rx", 5);
+            svg.append("text").attr("x", smjX).attr("y", 385).text("JOIN Distribuido").attr("text-anchor", "middle").attr("fill", "white").style("font-weight", "bold");
+
+            // Arrow markers
+            const defs = svg.append("defs");
+            defs.append("marker").attr("id", "arrow-yellow").attr("viewBox", "0 -5 10 10").attr("refX", 5).attr("refY", 0).attr("markerWidth", 4).attr("markerHeight", 4).attr("orient", "auto").append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#fde047");
+            defs.append("marker").attr("id", "arrow-violet").attr("viewBox", "0 -5 10 10").attr("refX", 5).attr("refY", 0).attr("markerWidth", 4).attr("markerHeight", 4).attr("orient", "auto").append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#8b5cf6");
+        }
+
+        const slides = document.querySelectorAll('main > section');
+        let currentSlide = 0;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slide-counter');
+        
+        function drawVisibleDiagram() {
+            const activeSlide = slides[currentSlide];
+            if (!activeSlide) return;
+            const container = activeSlide.querySelector('.diagram-container');
+            if (!container) return;
+            
+            d3.select(container).select("svg").remove();
+            const containerId = `#${container.id}`;
+
+            switch(container.id) {
+                case 'diagram-join':
+                    drawJoinDiagram(containerId);
+                    break;
+            }
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === slides.length - 1;
+            slideCounter.textContent = `${index + 1} / ${slides.length}`;
+            drawVisibleDiagram();
+        }
+        
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } });
+        nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } });
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextBtn.click(); 
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevBtn.click();
+            }
+        });
+        
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>
