@@ -92,10 +92,29 @@
         <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">El Director de Orquesta: AQE</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">La **Ejecución Adaptativa de Consultas (AQE)** es la capacidad de Spark para cambiar su estrategia de JOIN a mitad de la ejecución si los datos reales no coinciden con sus estimaciones, garantizando casi siempre el plan más óptimo.</p><p class="text-xl text-gray-200 font-bold bg-green-900/50 p-4 rounded-lg mt-6 border border-green-700">Vemos su presencia en el plan con el operador `AdaptiveSparkPlan`.</p></div></section>
 
         <!-- Slide 13: Mantenimiento -->
-        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Mantenimiento: Mantener la Velocidad</h2><p class="text-lg text-gray-400 text-center mb-8">Las optimizaciones no son estáticas. Para que Spark siga tomando buenas decisiones, debemos mantener nuestras tablas.</p><div class="grid md:grid-cols-2 gap-8"><div class="bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-cyan-300 mb-3">`OPTIMIZE`</h3><p class="text-gray-300">Es como "ordenar y limpiar" nuestro archivador. Compacta archivos pequeños y aplica el Z-Ordering.</p></div><div class="bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-green-300 mb-3">`ANALYZE TABLE`</h3><p class="text-gray-300">Es como "hacer un inventario". Recolecta estadísticas para que Spark sepa el tamaño y la distribución de los datos.</p></div></div></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Mantenimiento: Mantener la Velocidad</h2><p class="text-lg text-gray-400 text-center mb-8">Las optimizaciones no son estáticas. Para que Spark siga tomando buenas decisiones, debemos mantener nuestras tablas.</p><div class="grid md:grid-cols-2 gap-8"><div class="bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-cyan-300 mb-3">`OPTIMIZE`</h3><p class="text-gray-300">Es como "ordenar y limpiar" nuestro archivador. Compacta archivos pequeños y aplica el Z-Ordering.</p></div><div class="bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-green-300 mb-3">`ANALYZE TABLE`</h3><p class="text-gray-300">Es como "hacer un inventario". Recolecta estadísticas para que Spark sepa el tamaño y la distribución de los datos.</p></div></div></section>
         
-        <!-- Slide 14: Poniéndolo todo junto -->
-        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Poniéndolo todo Junto</h2><p class="text-lg text-gray-400 text-center mb-8">Imagina la solicitud: "Los 5 productos más devueltos por clientes de 'Bogotá D.C.' en la primera semana de Febrero de 2023."</p><div class="text-left bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-violet-300 mb-3">Una consulta optimizada...</h3><ol class="list-decimal list-inside space-y-2 text-gray-300"><li>Añade `WHERE id_fecha BETWEEN '2023-02-01' AND '2023-02-07'`.</li><li>**Resultado:** Spark usa **Particionamiento** para leer solo 7 días de datos en lugar de años.</li><li>**Resultado:** Dentro de esas particiones, el **Z-Ordering** ayuda a encontrar rápidamente los datos de los pedidos devueltos.</li><li>**Resultado:** Al unir con `usuarios`, Spark elige un **Broadcast Join** porque la tabla de usuarios es pequeña.</li></ol><p class="mt-4 text-center font-bold text-white">¡Múltiples optimizaciones trabajando en conjunto para una respuesta rápida!</p></div></div></section>
+        <!-- Slide 14: Anatomía de una Consulta Real -->
+        <section>
+            <div class="content-box">
+                <h2 class="text-4xl font-bold text-white mb-6 text-center">Anatomía de una Consulta Real</h2>
+                <p class="text-lg text-gray-400 text-center mb-8">El plan de ejecución para nuestro ejercicio final es un mapa perfecto de todo lo que hemos aprendido.</p>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <img src="image_9af8e6.png" alt="Diagrama del Plan de Ejecución del Ejercicio Final" class="rounded-lg bg-gray-800 p-1 border border-gray-600">
+                    </div>
+                    <div class="text-left">
+                        <h3 class="text-2xl font-bold text-violet-300 mb-3">Desglosando el Plan:</h3>
+                        <ol class="list-decimal list-inside space-y-3 text-gray-300">
+                            <li><b>Múltiples Scans:</b> La base del plan (#14, #16, #17, #18) es leer las 4 tablas. Aquí es donde el Particionamiento y Z-Ordering hacen su magia para reducir el I/O.</li>
+                            <li><b>Shuffles y Joins:</b> Vemos una cascada de Joins (#13, #11, #9) para combinar los datos. Cada uno requiere un costoso Shuffle para co-localizar las claves.</li>
+                            <li><b>Agregación:</b> Los nodos `Grouping Aggregate` (#8, #6) realizan el `COUNT(*)` y el `GROUP BY`.</li>
+                            <li><b>Orden y Límite:</b> Finalmente, los nodos `TopK` (#5, #3) ordenan los resultados y seleccionan los 5 mejores, cumpliendo con el `ORDER BY` y `LIMIT`.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Slide 15: Resumen -->
         <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Resumen del Módulo</h2><ul class="list-disc list-inside space-y-4 text-xl text-gray-300"><li>El rendimiento no es magia, es **diseño y mantenimiento**.</li><li>Usamos **`EXPLAIN`** para diagnosticar y verificar, no para adivinar.</li><li>Optimizamos en capas: **Particionamiento** (directorios), **Z-Ordering** (archivos) y **Estrategias de JOIN** (algoritmos).</li><li>**AQE** es nuestra red de seguridad, adaptándose a la realidad de los datos.</li><li>Mantener las **estadísticas actualizadas** con `ANALYZE` es crucial.</li></ul></div></section>
