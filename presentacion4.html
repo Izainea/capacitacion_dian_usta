@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller: Dominando Common Table Expressions (CTEs)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #111827; /* bg-gray-900 */
+        }
+        section { 
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out; 
+            width: 100%;
+        }
+        section.active { 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .diagram-container { 
+            min-height: 450px; 
+            width: 100%; 
+        }
+        .content-box {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-top: 8px solid #8b5cf6; /* border-violet-500 */
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            width: 100%;
+        }
+        .code-block {
+            background-color: #0d1117;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            border: 1px solid #30363d;
+            text-align: left;
+        }
+    </style>
+</head>
+<body class="text-white flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <main class="w-full max-w-6xl mx-auto">
+        <!-- Slide 1: Título -->
+        <section><div class="content-box text-center"><h2 class="text-5xl font-black text-white mb-4 tracking-tight">Adiós al Infierno de las Subconsultas</h2><p class="text-2xl text-gray-300"><b>Dominando Common Table Expressions (CTEs)</b></p></div></section>
+
+        <!-- Slide 2: El Problema -->
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">El Problema: El "Infierno de las Subconsultas"</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">A medida que la lógica de negocio se vuelve más compleja, nuestras consultas SQL pueden convertirse en un laberinto de subconsultas anidadas, difíciles de leer, depurar y mantener.</p><div class="text-left mt-6 code-block"><pre><code class="language-sql">SELECT ...
+FROM (
+  SELECT ...
+  FROM (
+    SELECT ...
+    FROM tabla_A
+    WHERE ...
+  ) subconsulta_1
+  JOIN tabla_B ON ...
+) subconsulta_2
+WHERE ...</code></pre></div></div></section>
+
+        <!-- Slide 3: La Solución -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">La Solución: Modularidad con CTEs</h2><div class="grid md:grid-cols-2 gap-8 items-center"><p class="text-lg text-gray-300">Un Common Table Expression (CTE) es una **tabla temporal con nombre** que existe solo durante la ejecución de una consulta. Nos permite dividir una consulta compleja en bloques lógicos y reutilizables.<br><br>Piensa en ellos como variables en programación: asignas un nombre a un resultado intermedio para usarlo más adelante.</p><div class="text-left code-block"><pre><code class="language-sql">WITH nombre_cte_1 AS (
+  -- Lógica del primer paso
+  SELECT ... FROM ...
+),
+nombre_cte_2 AS (
+  -- Lógica que puede usar nombre_cte_1
+  SELECT ... FROM nombre_cte_1
+)
+-- Consulta final que usa los CTEs
+SELECT ... FROM nombre_cte_2;</code></pre></div></div></div></section>
+
+        <!-- Slide 4: El "Antes" -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El "Antes": Un Reporte Complejo</h2><p class="text-lg text-gray-400 text-center mb-8">**Caso de negocio:** Necesitamos un reporte que muestre el total de ventas y el número de pedidos por cliente, pero solo para aquellos clientes de 'Bogotá D.C.' que hayan gastado más de $500 en total.</p><div class="code-block"><pre><code class="language-sql">SELECT
+  nombre_usuario,
+  email,
+  total_gastado,
+  numero_pedidos
+FROM (
+  SELECT
+    u.id_usuario,
+    u.nombre_usuario,
+    u.email,
+    p.total_gastado,
+    p.numero_pedidos
+  FROM curso_arquitecturas.usuarios_silver u
+  JOIN (
+    SELECT
+      id_usuario,
+      SUM(monto_total) AS total_gastado,
+      COUNT(id_pedido) AS numero_pedidos
+    FROM curso_arquitecturas.pedidos_silver
+    GROUP BY id_usuario
+  ) p ON u.id_usuario = p.id_usuario
+  WHERE
+    u.ciudad = 'Bogotá D.C.'
+) AS reporte_clientes
+WHERE
+  total_gastado > 500;</code></pre></div></div></section>
+
+        <!-- Slide 5: El "Después" -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El "Después": Lógica Clara con CTEs</h2><p class="text-lg text-gray-400 text-center mb-8">Refactorizamos la consulta usando dos CTEs: uno para agregar los pedidos y otro para filtrar a los clientes.</p><div class="code-block"><pre><code class="language-sql">WITH ResumenPedidos AS (
+  -- Paso 1: Agregamos los datos de los pedidos por usuario.
+  SELECT
+    id_usuario,
+    SUM(monto_total) AS total_gastado,
+    COUNT(id_pedido) AS numero_pedidos
+  FROM curso_arquitecturas.pedidos_silver
+  GROUP BY id_usuario
+),
+ClientesBogota AS (
+  -- Paso 2: Unimos el resumen con los usuarios y filtramos por ciudad.
+  SELECT
+    u.nombre_usuario,
+    u.email,
+    rp.total_gastado,
+    rp.numero_pedidos
+  FROM curso_arquitecturas.usuarios_silver u
+  JOIN ResumenPedidos rp ON u.id_usuario = rp.id_usuario
+  WHERE u.ciudad = 'Bogotá D.C.'
+)
+-- Paso 3: Aplicamos el filtro final sobre el resultado intermedio.
+SELECT *
+FROM ClientesBogota
+WHERE total_gastado > 500;</code></pre></div></div></section>
+
+        <!-- Slide 6: Flujo de Datos Visual -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Visualizando el Flujo de Datos</h2><p class="text-lg text-gray-400 text-center mb-8">Los CTEs crean un pipeline de datos claro y secuencial dentro de nuestra consulta.</p><div id="diagram-cte-flow" class="diagram-container"></div></div></section>
+
+        <!-- Slide 7: ¡A Practicar! -->
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">¡A Practicar!</h2><p class="text-lg text-gray-400 text-center mb-8">**Nuevo reto:** Genera un reporte que muestre el producto más vendido (en cantidad) por cada categoría. Debes mostrar el nombre de la categoría, el nombre del producto y la cantidad total vendida.</p><div class="code-block"><pre><code class="language-sql">-- Pista: Necesitarás un CTE para sumar las cantidades por producto,
+-- y luego otro CTE o una función de ventana para encontrar el ranking
+-- de productos dentro de cada categoría.
+-- Tablas a usar: pedidos_silver y productos_silver</code></pre></div></div>
+                    <a href="presentacion4_1.html" class="card bg-gray-700 p-6 rounded-lg border border-transparent hover:border-indigo-500 lg:col-span-3">
+                        <h2 class="text-2xl text-indigo-300"><b>Módulo 2: Análisis de Secuencias y Comparativas</b></h2>
+                        <p class="text-gray-400 mt-2">Desbloqueando Análisis con Funciones de Ventana</p>
+                    </a>
+                </section>
+
+    </main>
+    
+    <div class="fixed bottom-8 flex space-x-4 z-10">
+        <button id="prevBtn" class="bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+        <div id="slide-counter" class="text-lg font-bold flex items-center justify-center px-4"></div>
+        <button id="nextBtn" class="bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
+    </div>
+    
+    <script>
+        function drawCteFlowDiagram() {
+            const containerId = '#diagram-cte-flow';
+            const width = 800, height = 450;
+            d3.select(containerId).select("svg").remove();
+            const svg = d3.select(containerId).append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`);
+
+            const nodes = [
+                { id: "pedidos_silver", fx: 100, fy: 100, color: '#10b981' },
+                { id: "usuarios_silver", fx: 100, fy: 300, color: '#10b981' },
+                { id: "CTE:\nResumenPedidos", fx: 350, fy: 100, color: '#3b82f6' },
+                { id: "CTE:\nClientesBogota", fx: 550, fy: 200, color: '#3b82f6' },
+                { id: "Resultado Final", fx: 750, fy: 200, color: '#f59e0b' }
+            ];
+
+            const links = [
+                { source: "pedidos_silver", target: "CTE:\nResumenPedidos" },
+                { source: "usuarios_silver", target: "CTE:\nClientesBogota" },
+                { source: "CTE:\nResumenPedidos", target: "CTE:\nClientesBogota" },
+                { source: "CTE:\nClientesBogota", target: "Resultado Final" }
+            ];
+
+            svg.append('defs').append('marker')
+                .attr('id', 'arrow')
+                .attr('viewBox', '0 -5 10 10')
+                .attr('refX', 25) // Adjusted for bigger nodes
+                .attr('refY', 0)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('fill', '#9ca3af');
+
+            const link = svg.append("g").selectAll("line").data(links).join("line")
+                .attr("stroke", "#9ca3af").attr("stroke-width", 2).attr("marker-end", "url(#arrow)");
+
+            const node = svg.append("g").selectAll("g").data(nodes).join("g");
+
+            node.append("circle").attr("r", 60).attr("fill", d => d.color); // Increased radius
+            node.append("text").attr("text-anchor", "middle").attr("fill", "white")
+                .style("font-size", "14px").style("font-weight", "bold").selectAll("tspan")
+                .data(d => d.id.split('\n')).join("tspan")
+                .attr("x", 0).attr("dy", (d, i, arr) => arr.length > 1 ? `${i * 1.2 - 0.3}em` : "0.3em").text(d => d);
+
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).strength(0.1).distance(200))
+                .force("charge", d3.forceManyBody().strength(-1200))
+                 .on("tick", () => {
+                    link
+                        .attr("x1", d => d.source.x)
+                        .attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x)
+                        .attr("y2", d => d.target.y);
+
+                    node
+                        .attr("transform", d => `translate(${d.x}, ${d.y})`);
+                });
+        }
+
+        const slides = document.querySelectorAll('main > section');
+        let currentSlide = 0;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slide-counter');
+        
+        function drawVisibleDiagram() {
+            const activeSlide = slides[currentSlide];
+            if (!activeSlide) return;
+            const container = activeSlide.querySelector('.diagram-container');
+            if (!container) return;
+            
+            d3.select(container).select("svg").remove();
+            
+            if (container.id === 'diagram-cte-flow') {
+                drawCteFlowDiagram();
+            }
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === slides.length - 1;
+            slideCounter.textContent = `${index + 1} / ${slides.length}`;
+            drawVisibleDiagram();
+        }
+        
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } });
+        nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } });
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextBtn.click(); 
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevBtn.click();
+            }
+        });
+        
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>

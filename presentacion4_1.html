@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller: Funciones de Ventana en SQL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #111827; /* bg-gray-900 */
+        }
+        section { 
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out; 
+            width: 100%;
+        }
+        section.active { 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .diagram-container { 
+            min-height: 450px; 
+            width: 100%; 
+        }
+        .content-box {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-top: 8px solid #34d399; /* border-emerald-500 */
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            width: 100%;
+        }
+        .code-block {
+            background-color: #0d1117;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            border: 1px solid #30363d;
+        }
+        .sql-keyword { color: #d8b4fe; font-weight: bold; } /* violet-300 */
+        .sql-function { color: #7dd3fc; } /* sky-300 */
+        .sql-string { color: #a7f3d0; } /* green-200 */
+        .sql-comment { color: #6b7280; } /* gray-500 */
+        .sql-number { color: #f9a8d4; } /* pink-300 */
+    </style>
+</head>
+<body class="text-white flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <main class="w-full max-w-7xl mx-auto">
+        <section>
+            <div class="content-box text-center">
+                <p class="text-xl text-emerald-400 font-bold">Módulo 2: Análisis de Secuencias y Comparativas</p>
+                <h2 class="text-5xl font-black text-white mt-2 tracking-tight">Más Allá del `GROUP BY`</h2>
+                <p class="text-2xl text-gray-300 mt-4">Desbloqueando Análisis con Funciones de Ventana</p>
+            </div>
+        </section>
+
+        <section>
+            <div class="content-box">
+                <h2 class="text-4xl font-bold text-white mb-6 text-center">El Concepto Clave: ¿Qué es una "Ventana"?</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="text-lg text-gray-300 space-y-4">
+                        <p>Una función de ventana realiza un cálculo sobre un conjunto de filas relacionadas—la "ventana"—pero, a diferencia de `GROUP BY`, **no colapsa las filas**.</p>
+                        <p>Cada fila conserva su identidad y obtiene un nuevo valor calculado a partir de sus "vecinas". La ventana se define con la cláusula <code class="bg-gray-700 px-2 py-1 rounded text-emerald-300">OVER()</code>.</p>
+                        <ul class="list-disc list-inside space-y-3 mt-4 text-gray-400">
+                            <li><b class="text-white">`PARTITION BY`</b>: Define el marco de la ventana. Agrupa las filas lógicamente (ej. por `id_producto`).</li>
+                            <li><b class="text-white">`ORDER BY`</b>: Establece el orden de las filas *dentro* de cada ventana (ej. por `fecha_pedido`), lo que es crucial para saber cuál es la fila "anterior" o "siguiente".</li>
+                        </ul>
+                    </div>
+                    <div id="diagram-ventana" class="diagram-container border border-gray-700 rounded-lg bg-gray-900">
+                        </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="content-box">
+                <h2 class="text-4xl font-bold text-white mb-6 text-center">El "Porqué": El Problema de Negocio</h2>
+                <p class="text-lg text-gray-300 text-center mb-8">El equipo de producto necesita análisis más profundos que una simple suma:</p>
+                <div class="grid md:grid-cols-2 gap-8 text-center text-xl">
+                    <div class="bg-gray-700/50 p-6 rounded-lg border border-emerald-500">
+                        <h3 class="font-bold text-white mb-3">1. Análisis de Crecimiento 📈</h3>
+                        <p class="text-gray-400">¿Cómo varían las ventas de un producto mes a mes?</p>
+                    </div>
+                    <div class="bg-gray-700/50 p-6 rounded-lg border border-emerald-500">
+                        <h3 class="font-bold text-white mb-3">2. Ranking de Productos 🏆</h3>
+                        <p class="text-gray-400">¿Cuál fue el producto más vendido dentro de cada categoría, cada mes?</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="content-box">
+                <h2 class="text-4xl font-bold text-white mb-6">Anti-Patrón: El `SELF-JOIN` para Crecimiento</h2>
+                <p class="text-lg text-gray-400 mb-4">La forma tradicional de comparar un mes con el anterior es unir una tabla consigo misma. Esto es problemático:</p>
+                <div class="code-block">
+<pre><code class="language-sql"><span class="sql-keyword">WITH</span> VentasMensuales <span class="sql-keyword">AS</span> (
+  <span class="sql-keyword">SELECT</span>
+    p.id_producto, d.anio, d.mes,
+    <span class="sql-function">SUM</span>(p.monto_total) <span class="sql-keyword">AS</span> ventas_mes
+  <span class="sql-keyword">FROM</span> pedidos_silver p <span class="sql-keyword">JOIN</span> dim_fecha d <span class="sql-keyword">ON</span> p.id_fecha = d.id_fecha
+  <span class="sql-keyword">GROUP BY</span> p.id_producto, d.anio, d.mes
+)
+<span class="sql-keyword">SELECT</span>
+  actual.id_producto, actual.anio, actual.mes,
+  actual.ventas_mes,
+  anterior.ventas_mes <span class="sql-keyword">AS</span> ventas_mes_anterior
+<span class="sql-keyword">FROM</span> VentasMensuales actual
+<span class="sql-keyword">LEFT JOIN</span> VentasMensuales anterior 
+  <span class="sql-keyword">ON</span> actual.id_producto = anterior.id_producto
+  <span class="sql-keyword">AND</span> actual.anio = anterior.anio <span class="sql-comment">-- Lógica compleja y frágil</span>
+  <span class="sql-keyword">AND</span> actual.mes = anterior.mes + <span class="sql-number">1</span>;
+</code></pre>
+                </div>
+                <ul class="list-disc list-inside space-y-2 text-lg text-red-400 mt-4">
+                    <li><b>Complejo e Ineficiente:</b> La lógica de unión es difícil de leer y no maneja bien los cambios de año.</li>
+                    <li><b>Costoso en Databricks:</b> Un `self-join` sobre una tabla grande puede provocar un **shuffle masivo de datos**, degradando el rendimiento.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <div class="content-box">
+                <h2 class="text-4xl font-bold text-white mb-6">Solución Elegante: La Función `LAG()`</h2>
+                <p class="text-lg text-gray-400 mb-4">`LAG()` nos permite acceder a datos de una fila anterior dentro de la misma ventana, sin necesidad de un `JOIN`.</p>
+                <div class="code-block">
+<pre><code class="language-sql"><span class="sql-keyword">WITH</span> VentasMensuales <span class="sql-keyword">AS</span> (
+  <span class="sql-keyword">SELECT</span>
+    p.id_producto, d.anio, d.mes,
+    <span class="sql-function">SUM</span>(p.monto_total) <span class="sql-keyword">AS</span> ventas_mes
+  <span class="sql-keyword">FROM</span> pedidos_silver p <span class="sql-keyword">JOIN</span> dim_fecha d <span class="sql-keyword">ON</span> p.id_fecha = d.id_fecha
+  <span class="sql-keyword">GROUP BY</span> p.id_producto, d.anio, d.mes
+)
+<span class="sql-keyword">SELECT</span>
+  id_producto, anio, mes, ventas_mes,
+  <span class="sql-function">LAG</span>(ventas_mes, <span class="sql-number">1</span>, <span class="sql-number">0</span>) <span class="sql-keyword">OVER</span> (
+    <span class="sql-keyword">PARTITION BY</span> id_producto 
+    <span class="sql-keyword">ORDER BY</span> anio, mes
+  ) <span class="sql-keyword">AS</span> ventas_mes_anterior
+<span class="sql-keyword">FROM</span> VentasMensuales;
+</code></pre>
+                </div>
+                <div class="mt-4 bg-gray-700/50 p-4 rounded-lg text-lg">
+                    <p><b class="text-emerald-300">Anatomía de la función:</b></p>
+                    <p class="text-gray-400"><code class="text-sky-300">LAG(columna, desfase, defecto)</code>: Obtiene el valor de la `columna`, `desfase` filas atrás, con un valor `defecto` si no existe.</p>
+                    <p class="text-gray-400"><code class="text-sky-300">OVER (PARTITION BY ... ORDER BY ...)</code>: Define la ventana donde opera la función.</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="content-box">
+                <h2 class="text-4xl font-bold text-white mb-6">Solución de Ranking: `RANK()` y `DENSE_RANK()`</h2>
+                <p class="text-lg text-gray-400 mb-4">Para encontrar el producto más vendido por categoría cada mes, usamos funciones de ranking.</p>
+                <div class="code-block">
+<pre><code class="language-sql"><span class="sql-keyword">WITH</span> VentasProductoMes <span class="sql-keyword">AS</span> (
+  <span class="sql-keyword">SELECT</span>
+    pr.categoria, d.anio, d.mes, pr.nombre_producto,
+    <span class="sql-function">SUM</span>(p.monto_total) <span class="sql-keyword">AS</span> ventas_totales
+  <span class="sql-keyword">FROM</span> pedidos_silver p
+  <span class="sql-keyword">JOIN</span> productos_silver pr <span class="sql-keyword">ON</span> p.id_producto = pr.id_producto
+  <span class="sql-keyword">JOIN</span> dim_fecha d <span class="sql-keyword">ON</span> p.id_fecha = d.id_fecha
+  <span class="sql-keyword">GROUP BY</span> pr.categoria, d.anio, d.mes, pr.nombre_producto
+)
+<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> (
+  <span class="sql-keyword">SELECT</span>
+    *,
+    <span class="sql-function">RANK</span>() <span class="sql-keyword">OVER</span> (
+        <span class="sql-keyword">PARTITION BY</span> categoria, anio, mes 
+        <span class="sql-keyword">ORDER BY</span> ventas_totales <span class="sql-keyword">DESC</span>
+    ) <span class="sql-keyword">AS</span> ranking
+  <span class="sql-keyword">FROM</span> VentasProductoMes
+)
+<span class="sql-keyword">WHERE</span> ranking = <span class="sql-number">1</span>;
+</code></pre>
+                </div>
+                 <div class="mt-4 bg-gray-700/50 p-4 rounded-lg text-lg">
+                    <p><b class="text-emerald-300">Diferencia Clave:</b></p>
+                    <p class="text-gray-400"><b class="text-white">RANK():</b> Asigna el mismo rango a los empates, pero deja un 'hueco' (1, 2, 2, 4).</p>
+                    <p class="text-gray-400"><b class="text-white">DENSE_RANK():</b> Asigna el mismo rango a los empates sin dejar 'huecos' (1, 2, 2, 3).</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="content-box">
+                <h2 class="text-4xl font-bold text-white mb-6 text-center">¡A Practicar! 🏋️</h2>
+                <p class="text-lg text-gray-300 text-center max-w-3xl mx-auto mb-6">Ahora es tu turno. El equipo de servicio al cliente quiere entender la frecuencia de compra de los usuarios.</p>
+                <blockquote class="border-l-4 border-emerald-500 pl-4 py-2 bg-gray-700/50 rounded-r-lg text-lg text-center max-w-3xl mx-auto mb-8">
+                    "Para cada pedido de un cliente, calcula cuántos **días han pasado desde su pedido inmediatamente anterior**."
+                </blockquote>
+                <div class="text-left max-w-xl mx-auto space-y-2">
+                    <p class="text-lg"><b class="text-emerald-300">Tabla de Salida Esperada:</b></p>
+                    <ul class="list-disc list-inside text-gray-400">
+                        <li>`id_usuario`</li>
+                        <li>`id_pedido`</li>
+                        <li>`ts_pedido` (fecha actual del pedido)</li>
+                        <li>`dias_desde_ultimo_pedido` (tu cálculo)</li>
+                    </ul>
+                     <p class="text-lg mt-4"><b class="text-emerald-300">Pistas:</b></p>
+                    <ul class="list-disc list-inside text-gray-400">
+                        <li>Necesitarás `LAG()` sobre la fecha del pedido.</li>
+                        <li>La ventana debe ser `PARTITION BY id_usuario`.</li>
+                        <li>Usa la función `DATEDIFF()` para calcular la diferencia de días.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <div class="content-box">
+                <h2 class="text-4xl font-bold text-white mb-6 text-center">Solución del Ejercicio</h2>
+                <p class="text-lg text-gray-400 mb-4 text-center">Aquí está la solución para calcular los días entre pedidos por cliente.</p>
+                <div class="code-block">
+<pre><code class="language-sql"><span class="sql-keyword">SELECT</span>
+  id_usuario,
+  id_pedido,
+  ts_pedido,
+  <span class="sql-function">DATEDIFF</span>(
+    ts_pedido,
+    <span class="sql-function">LAG</span>(ts_pedido, <span class="sql-number">1</span>) <span class="sql-keyword">OVER</span> (<span class="sql-keyword">PARTITION BY</span> id_usuario <span class="sql-keyword">ORDER BY</span> ts_pedido)
+  ) <span class="sql-keyword">AS</span> dias_desde_ultimo_pedido
+<span class="sql-keyword">FROM</span>
+  curso_arquitecturas.pedidos_silver
+<span class="sql-keyword">ORDER BY</span>
+  id_usuario, ts_pedido;
+</code></pre>
+                </div>
+                <p class="text-lg text-gray-400 mt-4">Observa cómo la primera fila de cada `id_usuario` tiene un valor `NULL`, ya que no hay un pedido anterior en esa partición del cual obtener la fecha.</p>
+            </div>
+        </section>
+
+    </main>
+    
+    <div class="fixed bottom-4 right-4 flex items-center space-x-4 z-10">
+        <button id="prevBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+        <div id="slide-counter" class="text-lg font-bold bg-gray-700 px-4 py-2 rounded-md"></div>
+        <button id="nextBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
+    </div>
+    
+    <script>
+        const slides = document.querySelectorAll('main > section');
+        let currentSlide = 0;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slide-counter');
+
+        function drawWindowDiagram() {
+            const containerId = '#diagram-ventana';
+            d3.select(containerId).select("svg").remove();
+            const width = 500, height = 450;
+            const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+
+            const data = [
+                { x: 50, y: 50, p: 'A', o: 1, val: 10 }, { x: 50, y: 120, p: 'A', o: 2, val: 15 }, { x: 50, y: 190, p: 'A', o: 3, val: 12 },
+                { x: 200, y: 50, p: 'B', o: 1, val: 20 }, { x: 200, y: 120, p: 'B', o: 2, val: 22 }, { x: 200, y: 190, p: 'B', o: 3, val: 25 }, { x: 200, y: 260, p: 'B', o: 4, val: 21 },
+                { x: 350, y: 50, p: 'C', o: 1, val: 30 }, { x: 350, y: 120, p: 'C', o: 2, val: 35 }
+            ];
+            
+            svg.append("text").attr("x", width/2).attr("y", 25).text("PARTITION BY (Color)").attr("text-anchor", "middle").attr("fill", "#a7f3d0");
+            svg.append("text").attr("x", width/2).attr("y", height - 10).text("ORDER BY (Posición Vertical)").attr("text-anchor", "middle").attr("fill", "#a7f3d0");
+
+            const partitionColors = { 'A': '#f87171', 'B': '#60a5fa', 'C': '#facc15' };
+
+            const nodes = svg.selectAll("g.node").data(data).join("g").attr("class", "node")
+                .attr("transform", d => `translate(${d.x}, ${d.y})`)
+                .style("cursor", "pointer");
+
+            nodes.append("rect")
+                .attr("x", -40).attr("y", -25)
+                .attr("width", 80).attr("height", 50)
+                .attr("rx", 5)
+                .attr("fill", d => partitionColors[d.p])
+                .attr("stroke", "#111827").attr("stroke-width", 2);
+
+            nodes.append("text").text(d => `Val: ${d.val}`).attr("text-anchor", "middle").attr("fill", "black").style("font-weight", "bold");
+
+            const windowBox = svg.append("rect")
+                .attr("stroke", "#34d399").attr("stroke-width", 4)
+                .attr("stroke-dasharray", "8 4")
+                .attr("fill", "none")
+                .attr("rx", 10)
+                .style("opacity", 0);
+            
+            nodes.on("mouseover", (event, d) => {
+                const partitionData = data.filter(pt => pt.p === d.p);
+                const yMin = d3.min(partitionData, pt => pt.y);
+                const yMax = d3.max(partitionData, pt => pt.y);
+
+                windowBox.transition().duration(200)
+                    .attr("x", d.x - 60)
+                    .attr("y", yMin - 40)
+                    .attr("width", 120)
+                    .attr("height", yMax - yMin + 80)
+                    .style("opacity", 1);
+            }).on("mouseout", () => {
+                windowBox.transition().duration(200).style("opacity", 0);
+            });
+        }
+        
+        function drawVisibleDiagram() {
+            const activeSlide = slides[currentSlide];
+            if (!activeSlide) return;
+            const container = activeSlide.querySelector('.diagram-container');
+            if (!container) return;
+            
+            switch(container.id) {
+                case 'diagram-ventana':
+                    drawWindowDiagram();
+                    break;
+            }
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === slides.length - 1;
+            slideCounter.textContent = `${index + 1} / ${slides.length}`;
+            drawVisibleDiagram();
+        }
+        
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } });
+        nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } });
+        
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextBtn.click(); 
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevBtn.click();
+            }
+        });
+        
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>

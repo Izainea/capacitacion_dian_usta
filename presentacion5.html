@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 5: La Arquitectura Lakehouse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #111827; /* bg-gray-900 */
+        }
+        section { 
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out; 
+            width: 100%;
+        }
+        section.active { 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .diagram-container { 
+            min-height: 450px; 
+            width: 100%; 
+        }
+        .content-box {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-top: 8px solid #0ea5e9; /* border-sky-500 */
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            width: 100%;
+        }
+         .code-block {
+            background-color: #0d1117;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            border: 1px solid #30363d;
+        }
+    </style>
+</head>
+<body class="text-white flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <main class="w-full max-w-6xl mx-auto">
+        <section><div class="content-box text-center"><h2 class="text-5xl font-black text-white mb-4 tracking-tight">Módulo 5: La Arquitectura Lakehouse</h2><p class="text-2xl text-gray-300"><b>Unificando el Data Lake y el Data Warehouse</b></p></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Agenda del Módulo</h2><ol class="list-decimal list-inside space-y-4 text-xl text-gray-300"><li><b>El Problema:</b> El dilema histórico de las dos plataformas (DW vs DL).</li><li><b>La Solución:</b> ¿Qué es y por qué necesitamos una Arquitectura Lakehouse?</li><li><b>La Tecnología Clave:</b> Entendiendo el rol de Delta Lake.</li><li><b>El Patrón de Implementación:</b> La Arquitectura Medallion paso a paso.</li><li><b>Manos a la Obra:</b> Conectando la teoría con nuestro taller práctico.</li></ol></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Dilema Histórico: Dos Mundos Separados</h2><div class="grid md:grid-cols-2 gap-8 text-lg"><div class="bg-blue-900/50 p-6 rounded-lg border border-blue-500"><h3 class="text-2xl font-bold text-blue-300 mb-3">Data Warehouse</h3><ul class="list-disc list-inside space-y-2 text-gray-300"><li><b>Ideal para</b>: Business Intelligence (BI) y reporting.</li><li><b>Fortaleza</b>: Datos estructurados, fiables y consistentes.</li><li><b>Debilidad</b>: Rígido, costoso y no apto para datos no estructurados o Machine Learning.</li></ul></div><div class="bg-green-900/50 p-6 rounded-lg border border-green-500"><h3 class="text-2xl font-bold text-green-300 mb-3">Data Lake</h3><ul class="list-disc list-inside space-y-2 text-gray-300"><li><b>Ideal para</b>: Big Data y Machine Learning (ML).</li><li><b>Fortaleza</b>: Flexible, escalable y económico. Almacena cualquier tipo de dato.</li><li><b>Debilidad</b>: Propenso al caos ("Data Swamp"), sin garantías de fiabilidad (ACID).</li></ul></div></div><p class="text-center text-red-400 font-bold mt-8 text-xl">El resultado: silos de datos, duplicación de información y complejidad.</p></div></section>
+
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">Las Consecuencias de un Sistema Dividido</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Esta separación crea fricción y problemas graves a medida que una organización madura:</p><div class="grid md:grid-cols-2 gap-8 mt-6 text-left"><div class="bg-gray-700 p-6 rounded-lg"><h3 class="font-bold text-sky-300 text-xl mb-2">Duplicación de Datos y Costos</h3><p class="text-gray-400">Los mismos datos se copian y procesan dos veces: una para el DW y otra para el DL, aumentando los costos de almacenamiento y cómputo.</p></div><div class="bg-gray-700 p-6 rounded-lg"><h3 class="font-bold text-sky-300 text-xl mb-2">Datos Viejos (Stale Data)</h3><p class="text-gray-400">El proceso de mover y transformar datos al DW (ETL) es lento. Las decisiones de negocio a menudo se toman con datos que tienen horas o incluso días de antigüedad.</p></div></div></div></section>
+
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">La Solución: La Arquitectura Lakehouse</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Es un nuevo paradigma de arquitectura de datos que combina lo mejor de ambos mundos: la <b>flexibilidad y escalabilidad</b> de un Data Lake con la <b>fiabilidad, estructura y rendimiento</b> de un Data Warehouse.</p><p class="text-xl text-gray-200 font-bold bg-sky-900/50 p-4 rounded-lg mt-6 border border-sky-700">Permite tener una única fuente de datos para BI y Machine Learning directamente sobre el Data Lake.</p></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">La Tecnología Clave: Delta Lake</h2><div class="grid md:grid-cols-2 gap-8 items-center"><p class="text-lg text-gray-300">La magia de la Lakehouse es posible gracias a una capa de almacenamiento de código abierto llamada <b>Delta Lake</b>. <br><br>Delta Lake se asienta sobre tu Data Lake existente (como Amazon S3 o Azure Data Lake Storage) y le añade superpoderes que antes solo existían en los Data Warehouses:</p><ul class="list-disc list-inside space-y-2 text-lg text-gray-300 mt-4"><li><b>Transacciones ACID</b>: Garantiza que tus operaciones sobre los datos sean fiables.</li><li><b>Time Travel</b>: Permite consultar versiones anteriores de tus datos o deshacer cambios.</li><li><b>Schema Enforcement</b>: Evita que datos de mala calidad corrompan tus tablas.</li><li><b>Soporte para DML</b>: Permite `UPDATES`, `DELETES` y `MERGES` directamente sobre el Data Lake.</li></ul></div></div></section>
+        
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-2 text-center">El Patrón de Implementación: Arquitectura Medallion</h2><p class="text-lg text-gray-400 text-center mb-8">No basta con tener la tecnología. Necesitamos un método para organizar los datos. La Arquitectura Medallion es un patrón que organiza los datos en tres capas de calidad incremental.</p><div id="diagram-medallion" class="diagram-container"></div></div></section>
+
+        <section><div class="content-box text-center"><div class="text-6xl mb-4">🥉</div><h2 class="text-4xl font-bold text-yellow-600 mb-4">Capa Bronze: Datos Crudos (La Pista de Aterrizaje)</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Es la primera parada de los datos. La información se ingesta desde los sistemas de origen y se almacena en su formato nativo, <b>sin procesar</b>.</p><ul class="list-disc list-inside space-y-2 text-lg text-gray-400 mt-4 inline-block text-left"><li><b>Objetivo</b>: Preservar un archivo histórico inmutable de todos los datos que han llegado.</li><li><b>Estructura</b>: La misma que la del sistema de origen (Schema-on-read).</li><li><b>Técnica</b>: Append-only (solo se añaden datos, nunca se modifican).</li></ul></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">La Transformación: de Bronze a Silver</h2><p class="text-lg text-gray-400 text-center mb-8">Este es el paso más crítico del pipeline. Aquí es donde los datos crudos y poco confiables se convierten en un activo empresarial valioso. Las tareas clave incluyen:</p><ul class="list-disc list-inside space-y-4 text-xl text-gray-300 max-w-2xl mx-auto"><li><b>Limpieza</b>: Manejo de valores nulos, corrección de formatos.</li><li><b>Validación</b>: Aplicación de reglas de negocio y "quality gates" para descartar datos malos.</li><li><b>Enriquecimiento</b>: Unión de datos de diferentes fuentes (ej. pedidos con clientes).</li><li><b>Modelado</b>: Estructuración de los datos en un modelo consistente (ej. esquema en estrella).</li></ul></div></section>
+        
+        <section><div class="content-box text-center"><div class="text-6xl mb-4">🥈</div><h2 class="text-4xl font-bold text-gray-400 mb-4">Capa Silver: La Fuente de la Verdad</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Aquí es donde los datos se transforman en un activo confiable. Los datos de la capa Bronze se <b>limpian, validan, conforman y modelan</b>.</p><ul class="list-disc list-inside space-y-2 text-lg text-gray-400 mt-4 inline-block text-left"><li><b>Objetivo</b>: Crear una "fuente única de la verdad" para toda la empresa.</li><li><b>Estructura</b>: Modelada para el análisis (ej. Esquema en Estrella con hechos y dimensiones).</li><li><b>Usuarios</b>: Ingenieros, científicos y analistas de datos.</li></ul></div></section>
+
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">La Transformación: de Silver a Gold</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Esta transformación se enfoca en el rendimiento y la facilidad de uso para el negocio. Tomamos la "fuente de la verdad" de la capa Silver y creamos vistas específicas y agregadas.</p><div class="code-block mt-6"><pre><code>-- Ejemplo: Tomamos la tabla de hechos y la de clientes (Silver)...
+-- ... y creamos una tabla pre-agregada con las ventas por estado (Gold).
+
+CREATE TABLE gold.ventas_por_estado AS
+SELECT c.estado, SUM(f.total_venta) AS ventas_totales
+FROM silver.hechos_ventas f
+JOIN silver.dim_clientes c ON f.cliente_id = c.id
+GROUP BY c.estado;</code></pre></div></div></section>
+
+        <section><div class="content-box text-center"><div class="text-6xl mb-4">🥇</div><h2 class="text-4xl font-bold text-yellow-400 mb-4">Capa Gold: Lista para el Negocio (El Plato Servido)</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Es la capa final, optimizada para el consumo. Contiene tablas <b>agregadas y específicas</b> para un caso de uso de negocio.</p><ul class="list-disc list-inside space-y-2 text-lg text-gray-400 mt-4 inline-block text-left"><li><b>Objetivo</b>: Potenciar el BI, el reporting y el ML con tablas de alto rendimiento.</li><li><b>Estructura</b>: Altamente desnormalizada y específica del proyecto (ej. `resumen_ventas_mensual`).</li><li><b>Usuarios</b>: Analistas de negocio y usuarios finales de dashboards.</li></ul></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">¿Quién Usa Cada Capa?</h2><div class="grid md:grid-cols-3 gap-8 text-center"><div class="bg-yellow-800/50 p-6 rounded-lg border border-yellow-600"> <h3 class="text-2xl font-bold text-yellow-500 mb-3">Bronze</h3><p class="text-gray-300 text-lg">Ingenieros de Datos</p></div><div class="bg-gray-600/50 p-6 rounded-lg border border-gray-400"><h3 class="text-2xl font-bold text-gray-300 mb-3">Silver</h3><p class="text-gray-300 text-lg">Científicos de Datos<br>Analistas Avanzados</p></div><div class="bg-yellow-600/50 p-6 rounded-lg border border-yellow-400"><h3 class="text-2xl font-bold text-yellow-300 mb-3">Gold</h3><p class="text-gray-300 text-lg">Analistas de Negocio<br>Usuarios de BI</p></div></div></div></section>
+
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">El Flujo Completo en Acción</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Así se ve el panorama completo: desde las fuentes de datos hasta los consumidores finales, todo sobre una única plataforma y una única copia de los datos.</p><div id="diagram-full-flow" class="diagram-container"></div></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Resumen: Beneficios del Enfoque Medallion</h2><ul class="list-disc list-inside space-y-4 text-xl text-gray-300"><li><b>Simplicidad:</b> Proporciona una estructura clara y fácil de entender para organizar el Data Lake.</li><li><b>Fiabilidad:</b> Garantiza la calidad y la integridad de los datos a través de validaciones incrementales.</li><li><b>Flexibilidad:</b> Permite a diferentes tipos de usuarios trabajar con los datos en el nivel de refinamiento que necesitan.</li><li><b>Eficiencia:</b> Evita la duplicación de datos y el reprocesamiento innecesario, ahorrando tiempo y costos.</li></ul></div></section>
+
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-6">¡Ahora, a la Práctica!</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Ahora que entendemos la teoría de la Lakehouse y el patrón Medallion en profundidad, vamos a aplicarlo.</p><p class="text-xl text-gray-200 font-bold bg-sky-900/50 p-4 rounded-lg mt-6 border border-sky-700">En nuestro taller, hemos estado haciendo exactamente esto: tomar los datos crudos (Bronze), construir un modelo en estrella (Silver) y crear agregados de negocio (Gold).</p></div></section>
+
+    </main>
+    
+    <div class="fixed bottom-8 flex space-x-4 z-10">
+        <button id="prevBtn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+        <div id="slide-counter" class="text-lg font-bold flex items-center justify-center px-4"></div>
+        <button id="nextBtn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
+    </div>
+    
+    <script>
+        function drawDiagram(containerId, nodes, links, width = 800, height = 450) {
+            d3.select(containerId).select("svg").remove();
+            const svg = d3.select(containerId).append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`);
+            
+            svg.append("defs").append("marker")
+                .attr("id", "arrow")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 10)
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5")
+                .attr("fill", "#9ca3af");
+
+            const link = svg.append("g").selectAll("line").data(links).join("line")
+                .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x).attr("y2", d => d.target.y)
+                .attr("stroke", "#9ca3af").attr("stroke-width", 2)
+                .attr("marker-end", "url(#arrow)");
+
+            const node = svg.append("g").selectAll("g").data(nodes).join("g")
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+
+            node.append("rect")
+                .attr("x", d => -(d.width || 120) / 2)
+                .attr("y", d => -(d.height || 60) / 2)
+                .attr("width", d => d.width || 120)
+                .attr("height", d => d.height || 60)
+                .attr("rx", 10)
+                .attr("fill", d => d.color)
+                .attr("stroke", d => d.stroke || "#1f2937")
+                .attr("stroke-width", 4);
+                
+            node.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", "0.3em")
+                .attr("fill", "white")
+                .style("font-size", "12px")
+                .style("font-weight", "bold")
+                .text(d => d.id);
+        }
+
+        const medallionNodes = [
+            { id: "Bronze", x: 150, y: 225, color: "#ca8a04", width: 140, height: 70 },
+            { id: "Silver", x: 400, y: 225, color: "#a1a1aa", width: 140, height: 70 },
+            { id: "Gold", x: 650, y: 225, color: "#f59e0b", width: 140, height: 70 }
+        ];
+        const medallionLinks = [
+            { source: medallionNodes[0], target: medallionNodes[1] },
+            { source: medallionNodes[1], target: medallionNodes[2] }
+        ];
+
+        const fullFlowNodes = [
+            { id: "Fuentes", x: 100, y: 150, color: "#1d4ed8" },
+            { id: "Kafka", x: 100, y: 250, color: "#1d4ed8" },
+            { id: "Bronze", x: 280, y: 200, color: "#ca8a04", width: 100, height: 120 },
+            { id: "Silver", x: 450, y: 200, color: "#a1a1aa", width: 100, height: 120 },
+            { id: "Gold", x: 620, y: 200, color: "#f59e0b", width: 100, height: 120 },
+            { id: "BI", x: 750, y: 150, color: "#059669" },
+            { id: "ML", x: 750, y: 250, color: "#059669" }
+        ];
+        const fullFlowLinks = [
+            { source: fullFlowNodes[0], target: fullFlowNodes[2] },
+            { source: fullFlowNodes[1], target: fullFlowNodes[2] },
+            { source: fullFlowNodes[2], target: fullFlowNodes[3] },
+            { source: fullFlowNodes[3], target: fullFlowNodes[4] },
+            { source: fullFlowNodes[4], target: fullFlowNodes[5] },
+            { source: fullFlowNodes[4], target: fullFlowNodes[6] }
+        ];
+
+        const slides = document.querySelectorAll('main > section');
+        let currentSlide = 0;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slide-counter');
+        
+        function drawVisibleDiagram() {
+            const activeSlide = slides[currentSlide];
+            if (!activeSlide) return;
+            const container = activeSlide.querySelector('.diagram-container');
+            if (!container) return;
+            
+            const containerId = `#${container.id}`;
+
+            switch(container.id) {
+                case 'diagram-medallion':
+                    drawDiagram(containerId, medallionNodes, medallionLinks);
+                    break;
+                case 'diagram-full-flow':
+                    drawDiagram(containerId, fullFlowNodes, fullFlowLinks);
+                    break;
+            }
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === slides.length - 1;
+            slideCounter.textContent = `${index + 1} / ${slides.length}`;
+            drawVisibleDiagram();
+        }
+        
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } });
+        nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } });
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextBtn.click(); 
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevBtn.click();
+            }
+        });
+        
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>
