@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 6: Taller Práctico - Del Pipeline al Modelo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Fira+Code&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #111827; /* bg-gray-900 */
+        }
+        section { 
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out; 
+            width: 100%;
+        }
+        section.active { 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .diagram-container { 
+            min-height: 450px; 
+            width: 100%; 
+        }
+        .content-box {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-top: 8px solid #8b5cf6; /* border-violet-500 */
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            width: 100%;
+        }
+        .code-block {
+            background-color: #0d1117;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+        }
+        .sql-keyword { color: #d8b4fe; }
+        .sql-function { color: #93c5fd; }
+        .sql-string { color: #a3e635; }
+        .sql-comment { color: #6b7280; }
+    </style>
+</head>
+<body class="text-white flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <main class="w-full max-w-6xl mx-auto">
+        <section><div class="content-box text-center"><h2 class="text-5xl font-black text-white mb-4 tracking-tight">Módulo 6: Taller Práctico</h2><p class="text-2xl text-gray-300"><b>Del Pipeline de Datos al Modelo de Machine Learning</b></p></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Agenda del Taller Práctico</h2><ol class="list-decimal list-inside space-y-4 text-xl text-gray-300"><li><b>Fase 1: Construcción del Pipeline Modularizado</b><ul class="list-disc list-inside ml-8 mt-2 text-lg text-gray-400"><li>Configuración del entorno y carga de datos reales (Olist).</li><li>Ingesta a la capa Bronce.</li><li>Validación de Calidad de Datos.</li><li>Transformación a la capa Silver (Modelo Dimensional).</li><li>Agregación de negocio en la capa Gold.</li><li>Orquestación del pipeline con Databricks Jobs.</li></ul></li><li><b>Fase 2: Del Dato al Insight con Machine Learning</b><ul class="list-disc list-inside ml-8 mt-2 text-lg text-gray-400"><li>Ingeniería de Características para segmentación de clientes (RFM).</li><li>Entrenamiento de un modelo K-Means con Scikit-learn.</li><li>Seguimiento de experimentos con MLflow.</li></ul></li><li><b>Fase 3: Monitoreo y Visualización</b><ul class="list-disc list-inside ml-8 mt-2 text-lg text-gray-400"><li>Creación de tableros para monitorear la salud del pipeline y los KPIs de negocio.</li></ul></li></ol></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-2 text-center">Fase 1: Pipeline Modularizado</h2><p class="text-lg text-gray-400 text-center mb-8">Se transformará el proceso de ETL en una serie de notebooks, simulando un job de producción.</p><div id="diagram-job-flow" class="diagram-container"></div></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6">Notebook 0: `00_Setup_Environment`</h2><p class="text-lg text-gray-300 mb-4">Esta tarea se ejecuta una sola vez para preparar la infraestructura en Unity Catalog. Un catálogo dedicado aísla el proyecto y facilita la gobernanza.</p><div class="code-block"><pre><code># Celda 1: Definir la configuración del catálogo y esquemas
+catalog_name = "sesion_5"
+bronze_schema = "bronze"
+# ... (y así sucesivamente para silver, gold, auditoria)
+
+# Celda 2: Crear la infraestructura en Unity Catalog
+spark.sql(f"CREATE CATALOG IF NOT EXISTS {catalog_name}")
+# ... (creación de esquemas)
+
+# Celda 3: Crear el volumen para los archivos crudos
+bronze_volume_path = f"/Volumes/{catalog_name}/{bronze_schema}/raw_files"
+spark.sql(f"CREATE VOLUME IF NOT EXISTS {catalog_name}.{bronze_schema}.raw_files")
+
+print(f"Por favor, cargue los archivos CSV del dataset Olist en: {bronze_volume_path}")</code></pre></div><p class="mt-4 text-lg text-gray-300"><b>Acción del Participante:</b> Cargar los archivos del dataset Olist de Kaggle en el volumen especificado.</p></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6">Notebook 1: `01_Bronze_Ingestion`</h2><p class="text-lg text-gray-300 mb-4">Esta tarea lee los archivos CSV del volumen y los persiste como tablas Delta en la capa Bronce, manteniendo los datos en su estado crudo original.</p><div class="code-block"><pre><code># Celda 2: Función de ayuda para cargar y escribir tablas
+def ingest_csv_to_bronze(file_name, table_name):
+    df = spark.read.option("header", "true").option("inferSchema", "true").csv(f"{bronze_volume_path}/{file_name}")
+    df.write.format("delta").mode("overwrite").saveAsTable(f"{catalog_name}.{bronze_schema}.{table_name}")
+    print(f"Tabla '{table_name}' creada en la capa Bronce.")
+
+# Celda 3: Ejecutar la ingesta para cada archivo
+ingest_csv_to_bronze("olist_customers_dataset.csv", "customers_bronze")
+# ... (y así para el resto de archivos)</code></pre></div><p class="mt-4 text-lg text-gray-300"><b>🏆 Desafío:</b> Completar el notebook para ingestar los archivos `olist_sellers_dataset.csv` y `product_category_name_translation.csv`.</p></div></section>
+        
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6">Notebook 2: `02_DataQuality_Validation`</h2><p class="text-lg text-gray-300 mb-4">Este notebook actúa como un "guardián de calidad". Utiliza una función para ejecutar reglas de negocio. Si una regla se rompe (la consulta devuelve más de 0 filas), el pipeline se detiene con una excepción.</p><div class="code-block"><pre><code># Celda 1: Función de ayuda para validaciones de calidad
+def ejecutar_validacion_calidad(query, descripcion_validacion):
+  print(f"Ejecutando validación: '{descripcion_validacion}'...")
+  df_resultado = spark.sql(query)
+  conteo_filas_malas = df_resultado.first()[0]
+  
+  if conteo_filas_malas > 0:
+    raise Exception(f"VALIDACIÓN FALLIDA: Se encontraron {conteo_filas_malas} filas que violan la regla.")
+  else:
+    print(f"VALIDACIÓN EXITOSA ✔️")
+
+# Celda 3: Ejecutar las reglas de negocio
+# REGLA 1: La llave primaria de un cliente NUNCA debe ser nula.
+query_pk_nula_cliente = "SELECT COUNT(*) FROM customers_bronze_vw WHERE customer_id IS NULL"
+ejecutar_validacion_calidad(query_pk_nula_cliente, "La columna 'customer_id' no debe contener nulos.")
+
+# REGLA 3: No debe haber pedidos sin al menos un item.
+query_pedidos_sin_items = """
+  SELECT COUNT(o.order_id)
+  FROM orders_bronze_vw o
+  LEFT JOIN order_items_bronze_vw i ON o.order_id = i.order_id
+  WHERE i.order_id IS NULL
+"""
+ejecutar_validacion_calidad(query_pedidos_sin_items, "Existen pedidos que no tienen ningún item asociado.")</code></pre></div><p class="mt-4 text-lg text-gray-300"><b>🤔 Punto de Análisis:</b> La REGLA 3 fallará. ¿Qué implicaciones tiene esto para el `JOIN` en la capa Silver? ¿Por qué un `INNER JOIN` es una estrategia efectiva para manejar implícitamente este problema de calidad?</p></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6">Notebook 3: `03_Silver_Transformation`</h2><p class="text-lg text-gray-300 mb-4">El corazón del ETL. Se transforman los datos validados de Bronce en un modelo dimensional limpio (Esquema en Estrella) en la capa Silver. Esta capa se convierte en la "fuente de la verdad" para el análisis.</p><div class="code-block"><pre><code><span class="sql-comment">-- Celda 2: Crear Dimensiones (dim_customers, dim_products)</span>
+<span class="sql-keyword">CREATE OR REPLACE TABLE</span> dim_products AS
+<span class="sql-keyword">SELECT</span>
+  p.product_id,
+  p.product_category_name,
+  t.product_category_name_english AS product_category_name_en,
+  ...
+<span class="sql-keyword">FROM</span> sesion_5.bronze.products_bronze p
+<span class="sql-keyword">LEFT JOIN</span> sesion_5.bronze.category_translation_bronze t ON p.product_category_name = t.product_category_name;
+
+<span class="sql-comment">-- Celda 3: Crear Tabla de Hechos (fact_orders) particionada</span>
+<span class="sql-keyword">CREATE OR REPLACE TABLE</span> fact_orders
+<span class="sql-keyword">PARTITIONED BY</span> (order_purchase_year)
+<span class="sql-keyword">AS</span>
+<span class="sql-keyword">SELECT</span> ...
+<span class="sql-keyword">FROM</span> sesion_5.bronze.orders_bronze o
+<span class="sql-keyword">JOIN</span> sesion_5.bronze.order_items_bronze i ON o.order_id = i.order_id
+...</code></pre></div><p class="mt-4 text-lg text-gray-300"><b>🏆 Desafío:</b> Modificar la consulta de creación de `fact_orders` para añadir una nueva columna llamada `total_value` que sea la suma de `price` y `freight_value`.</p></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6">Notebook 4: `04_Gold_Aggregation`</h2><p class="text-lg text-gray-300 mb-4">Se construyen tablas agregadas y pre-calculadas en la capa Gold. Estas tablas están diseñadas para responder preguntas de negocio específicas de manera muy rápida, alimentando directamente los tableros de BI.</p><div class="code-block"><pre><code><span class="sql-comment">-- Celda 2: Crear tabla de ventas mensuales por categoría</span>
+<span class="sql-keyword">CREATE OR REPLACE TABLE</span> monthly_sales_by_category_gold <span class="sql-keyword">AS</span>
+<span class="sql-keyword">SELECT</span>
+  YEAR(fo.order_purchase_date) AS anio,
+  MONTH(fo.order_purchase_date) AS mes,
+  dp.product_category_name_en AS categoria_producto,
+  <span class="sql-function">COUNT</span>(<span class="sql-keyword">DISTINCT</span> fo.order_id) AS numero_pedidos,
+  <span class="sql-function">SUM</span>(fo.payment_value) AS ingresos_totales
+<span class="sql-keyword">FROM</span> silver.fact_orders fo
+<span class="sql-keyword">JOIN</span> silver.dim_products dp ON fo.product_id = dp.product_id
+<span class="sql-keyword">WHERE</span> fo.order_status = 'delivered'
+<span class="sql-keyword">GROUP BY</span> anio, mes, categoria_producto;</code></pre></div><p class="mt-4 text-lg text-gray-300"><b>🏆 Desafío:</b> Crear una nueva tabla Gold llamada `customer_lifetime_value_gold` que calcule, para cada `customer_unique_id`, el gasto total y el número total de pedidos que ha realizado.</p></div></section>
+        
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-2 text-center">Fase 2: Del Dato al Insight con ML</h2><p class="text-lg text-gray-400 text-center mb-8">Se utilizarán los datos limpios de la capa Silver para segmentar clientes.</p><div class="grid md:grid-cols-2 gap-8"><div class="text-left"><h3 class="text-2xl font-bold text-violet-300 mb-3">Notebook 5: Feature Engineering</h3><p class="text-lg text-gray-300 mb-4">Se crea una tabla `gold` con características específicas para el modelo, calculando métricas RFM (Recencia, Frecuencia, Monetario) con Spark SQL.</p><div class="code-block"><pre><code><span class="sql-keyword">CREATE OR REPLACE TABLE</span>
+  customer_features_gold AS
+<span class="sql-keyword">WITH</span> rfm_metrics <span class="sql-keyword">AS</span> (
+  <span class="sql-keyword">SELECT</span>
+    c.customer_unique_id,
+    DATEDIFF(..., MAX(fo.order_purchase_date)) <span class="sql-keyword">AS</span> recency,
+    <span class="sql-function">COUNT</span>(<span class="sql-keyword">DISTINCT</span> fo.order_id) <span class="sql-keyword">AS</span> frequency,
+    <span class="sql-function">SUM</span>(fo.payment_value) <span class="sql-keyword">AS</span> monetary
+  <span class="sql-keyword">FROM</span> silver.fact_orders fo ...
+) ...</code></pre></div></div><div class="text-left"><h3 class="text-2xl font-bold text-violet-300 mb-3">Notebook 6: Model Training</h3><p class="text-lg text-gray-300 mb-4">Se entrena un modelo K-Means con `sklearn` y se registra la ejecución como un experimento de MLflow para su seguimiento y reproducibilidad.</p><div class="code-block"><pre><code><span class="sql-comment"># Configurar y ejecutar el experimento</span>
+user_email = spark.sql("SELECT current_user()").first()[0]
+mlflow.set_experiment(f"/Users/{user_email}/...")
+
+with mlflow.start_run() as run:
+    mlflow.autolog()
+    kmeans = KMeans(n_clusters=4, ...)
+    kmeans.fit(features_scaled)
+    silhouette = silhouette_score(...)
+    mlflow.log_metric("silhouette_score", silhouette)</code></pre></div></div></div></div></section>
+        
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-2 text-center">Fase 3: Creación de Tableros</h2><p class="text-lg text-gray-400 text-center mb-8">Se crearán tableros para monitorear la salud del pipeline y los KPIs de negocio.</p><div class="grid md:grid-cols-2 gap-8"><div class="text-left"><h3 class="text-2xl font-bold text-violet-300 mb-3">Paso A: Crear Datasets</h3><p class="text-lg text-gray-300 mb-4">En la pestaña **Data** del Dashboard, se crean los datasets a partir de consultas SQL guardadas en el notebook `05_Dashboard_Queries`.</p><div class="code-block"><pre><code><span class="sql-comment">-- Ejemplo de consulta para un dataset</span>
+<span class="sql-keyword">SELECT</span>
+  categoria_producto,
+  <span class="sql-function">SUM</span>(ingresos_totales) <span class="sql-keyword">AS</span> ingresos
+<span class="sql-keyword">FROM</span> gold.monthly_sales_by_category_gold
+<span class="sql-keyword">GROUP BY</span> categoria_producto
+<span class="sql-keyword">ORDER BY</span> ingresos <span class="sql-keyword">DESC LIMIT</span> 10;</code></pre></div></div><div class="text-left"><h3 class="text-2xl font-bold text-violet-300 mb-3">Paso B: Construir Visualizaciones</h3><p class="text-lg text-gray-300 mb-4">En la pestaña **Canvas**, se añaden widgets de visualización y se conectan a los datasets creados en el paso anterior para construir los tableros.</p><div id="diagram-dashboard" class="diagram-container"></div></div></div></div></section>
+
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-6">Conclusión del Taller</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Al finalizar esta sesión, los participantes habrán completado el ciclo de vida de un proyecto de datos de extremo a extremo:</p><ul class="list-disc list-inside space-y-2 text-lg text-gray-400 mt-4 inline-block text-left"><li>✔️ Construido un pipeline de datos modular y automatizable.</li><li>✔️ Implementado un framework de validación de calidad de datos.</li><li>✔️ Aplicado la arquitectura Medallion con datos reales.</li><li>✔️ Realizado ingeniería de características para un caso de uso de ML.</li><li>✔️ Entrenado y evaluado un modelo de clustering con seguimiento de experimentos.</li><li>✔️ Creado tableros para el monitoreo operacional y de negocio.</li></ul></div></section>
+
+    </main>
+    
+    <div class="fixed bottom-8 flex space-x-4 z-10">
+        <button id="prevBtn" class="bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+        <div id="slide-counter" class="text-lg font-bold flex items-center justify-center px-4"></div>
+        <button id="nextBtn" class="bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
+    </div>
+    
+    <script>
+        function drawDiagram(containerId, nodes, links, width = 800, height = 450) {
+            d3.select(containerId).select("svg").remove();
+            const svg = d3.select(containerId).append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`);
+            
+            svg.append("defs").append("marker")
+                .attr("id", "arrow")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 10)
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5")
+                .attr("fill", "#9ca3af");
+
+            const link = svg.append("g").selectAll("line").data(links).join("line")
+                .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x).attr("y2", d => d.target.y)
+                .attr("stroke", "#9ca3af").attr("stroke-width", 2)
+                .attr("marker-end", "url(#arrow)");
+
+            const node = svg.append("g").selectAll("g").data(nodes).join("g")
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+
+            node.append("rect")
+                .attr("x", d => -(d.width || 140) / 2)
+                .attr("y", d => -(d.height || 60) / 2)
+                .attr("width", d => d.width || 140)
+                .attr("height", d => d.height || 60)
+                .attr("rx", 10)
+                .attr("fill", d => d.color)
+                .attr("stroke", d => d.stroke || "#1f2937")
+                .attr("stroke-width", 4);
+                
+            node.append("text")
+                .selectAll("tspan")
+                .data(d => d.id.split('\\n'))
+                .join("tspan")
+                .attr("x", 0)
+                .attr("dy", (d, i) => i === 0 ? "0em" : "1.2em")
+                .attr("text-anchor", "middle")
+                .attr("fill", "white")
+                .style("font-size", "12px")
+                .style("font-weight", "bold")
+                .text(d => d);
+        }
+
+        const jobFlowNodes = [
+            { id: "01_Bronze_Ingestion", x: 120, y: 225, color: "#ca8a04", height: 80 },
+            { id: "02_DataQuality_Validation", x: 320, y: 225, color: "#dc2626", height: 80 },
+            { id: "03_Silver_Transformation", x: 520, y: 225, color: "#a1a1aa", height: 80 },
+            { id: "04_Gold_Aggregation", x: 720, y: 225, color: "#f59e0b", height: 80 }
+        ];
+        const jobFlowLinks = [
+            { source: jobFlowNodes[0], target: jobFlowNodes[1] },
+            { source: jobFlowNodes[1], target: jobFlowNodes[2] },
+            { source: jobFlowNodes[2], target: jobFlowNodes[3] }
+        ];
+        
+        const dashboardNodes = [
+           { id: "Notebook\\n05_Dashboard_Queries", x: 150, y: 225, color: "#1d4ed8", width: 160, height: 80 },
+           { id: "Dataset 1\\n(Conteo por Capa)", x: 400, y: 100, color: "#059669", width: 140, height: 70 },
+           { id: "Dataset 2\\n(Estado Pedidos)", x: 400, y: 225, color: "#059669", width: 140, height: 70 },
+           { id: "Dataset 3\\n(Ingresos Anuales)", x: 400, y: 350, color: "#059669", width: 140, height: 70 },
+           { id: "Dashboard\\n(Canvas)", x: 650, y: 225, color: "#be185d", width: 160, height: 80 },
+        ];
+        const dashboardLinks = [
+           { source: dashboardNodes[0], target: dashboardNodes[1] },
+           { source: dashboardNodes[0], target: dashboardNodes[2] },
+           { source: dashboardNodes[0], target: dashboardNodes[3] },
+           { source: dashboardNodes[1], target: dashboardNodes[4] },
+           { source: dashboardNodes[2], target: dashboardNodes[4] },
+           { source: dashboardNodes[3], target: dashboardNodes[4] },
+        ];
+
+        const slides = document.querySelectorAll('main > section');
+        let currentSlide = 0;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slide-counter');
+        
+        function drawVisibleDiagram() {
+            const activeSlide = slides[currentSlide];
+            if (!activeSlide) return;
+            const container = activeSlide.querySelector('.diagram-container');
+            if (!container) return;
+            
+            const containerId = `#${container.id}`;
+
+            switch(container.id) {
+                case 'diagram-job-flow':
+                    drawDiagram(containerId, jobFlowNodes, jobFlowLinks, 840);
+                    break;
+                case 'diagram-dashboard':
+                    drawDiagram(containerId, dashboardNodes, dashboardLinks);
+                    break;
+            }
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === slides.length - 1;
+            slideCounter.textContent = `${index + 1} / ${slides.length}`;
+            drawVisibleDiagram();
+        }
+        
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } });
+        nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } });
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextBtn.click(); 
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevBtn.click();
+            }
+        });
+        
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>
