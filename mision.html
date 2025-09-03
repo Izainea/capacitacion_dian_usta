@@ -128,37 +128,10 @@
             <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight">Plataforma de Certificación</h1>
             <p class="text-xl text-blue-300 mt-2">Arquitecto de Datos: SQL & Databricks Avanzado</p>
         </header>
-        
-        <div class="bg-gray-900 p-6 rounded-xl shadow-lg mb-8">
-            <h2 class="text-2xl font-bold text-blue-300 mb-4">Instrucciones para el Candidato</h2>
-            <div class="grid md:grid-cols-2 gap-6 items-center">
-                <div>
-                    <p class="mb-2">¡Bienvenido al desafío final! Esta es tu oportunidad para demostrar las habilidades de un verdadero Arquitecto de Datos. Completa las 4 misiones a continuación utilizando tus cuadernos de Databricks.</p>
-                    <p class="mb-2">
-                        <ul class="list-disc list-inside ml-4">
-                            <li>Analiza el problema de negocio.</li>
-                            <li>Escribe y prueba el código SQL necesario.</li>
-                            <li>Documenta tus soluciones y justificaciones en las áreas de texto provistas.</li>
-                        </ul>
-                    </p>
-                    <p class="font-bold mt-4">Al finalizar, genera tu informe de resultados y envíalo como PDF a <span class="text-yellow-300">carlozainea@usta.edu.co</span> para completar tu certificación.</p>
-                </div>
-                <div class="bg-blue-900/50 p-4 rounded-lg border border-blue-700">
-                     <div class="mb-4">
-                        <label for="candidateName" class="block text-sm font-medium text-gray-300 mb-1">Nombre del Candidato:</label>
-                        <input type="text" id="candidateName" placeholder="Ingresa tu nombre completo aquí" class="w-full p-2 rounded bg-gray-800 border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <button id="generateReportBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-transform transform hover:scale-105">
-                        Generar Informe de Resultados para Envío
-                    </button>
-                </div>
-            </div>
-        </div>
-
 
         <!-- Mission Tabs -->
         <div class="flex flex-wrap border-b border-gray-700 mb-6">
-            <button class="mission-tab py-3 px-6 text-lg font-bold active" data-target="mission0">Bienvenida</button>
+            <button class="mission-tab py-3 px-6 text-lg font-bold active" data-target="mission0">Bienvenida e Instrucciones</button>
             <button class="mission-tab py-3 px-6 text-lg font-bold" data-target="mission1">Misión 1</button>
             <button class="mission-tab py-3 px-6 text-lg font-bold" data-target="mission2">Misión 2</button>
             <button class="mission-tab py-3 px-6 text-lg font-bold" data-target="mission3">Misión 3</button>
@@ -171,19 +144,25 @@
             <!-- Misión 0: Bienvenida -->
             <div id="mission0" class="mission-content active">
                 <div class="bg-gray-900 p-8 rounded-xl shadow-lg">
-                    <h3 class="text-3xl font-bold text-blue-300 mb-4">Bienvenido al Desafío Final</h3>
-                    <p class="mb-4 text-gray-400 text-lg">Esta es tu oportunidad para demostrar las habilidades de un verdadero Arquitecto de Datos. El objetivo es validar y aplicar de manera práctica las competencias avanzadas en diseño, optimización y análisis en Databricks.</p>
+                    <h3 class="text-3xl font-bold text-blue-300 mb-4">¡Bienvenido al Desafío Final de Certificación!</h3>
+                    <p class="mb-4 text-gray-400 text-lg">Esta plataforma contiene todo lo que necesitas para completar tu certificación. A continuación encontrarás las 4 misiones que pondrán a prueba tus habilidades como Arquitecto de Datos.</p>
                     <div class="bg-gray-800 p-6 rounded-lg mt-6 border border-gray-700">
-                        <h4 class="font-bold text-xl mb-3 text-yellow-300">¿Cómo funciona?</h4>
+                        <h4 class="font-bold text-xl mb-3 text-yellow-300">Flujo de Trabajo del Taller</h4>
                         <ol class="list-decimal list-inside space-y-2 text-gray-300">
-                            <li>Navega a través de las 4 misiones usando las pestañas de arriba.</li>
-                            <li>Lee atentamente el contexto de negocio y los retos técnicos de cada misión.</li>
-                            <li>Utiliza tus cuadernos de Databricks para desarrollar y probar tus soluciones SQL.</li>
-                            <li>Documenta tus queries y justificaciones en las áreas de texto provistas en cada misión.</li>
+                            <li>Navega a la pestaña de cada misión para leer el contexto y los retos.</li>
+                            <li>Utiliza tus cuadernos de Databricks para desarrollar y probar tus soluciones en SQL.</li>
+                            <li>Regresa a esta plataforma para documentar tus queries y justificaciones en las áreas de texto provistas en cada misión.</li>
                             <li>Si necesitas ayuda, cada misión tiene pistas que puedes revelar.</li>
-                            <li>Cuando hayas completado todas las misiones, ve a la pestaña "Informe Final", ingresa tu nombre y genera tu reporte.</li>
-                            <li>Guarda el informe como PDF (`Ctrl+P` o `Cmd+P` -> Guardar como PDF) y envíalo a <b class="text-yellow-300">carlozainea@usta.edu.co</b> para completar tu certificación.</li>
+                            <li>Al completar las 4 misiones, ve a la pestaña "Informe Final" para generar tu entregable.</li>
+                            <li>Ingresa tu nombre, genera el informe y guárdalo como PDF.</li>
+                            <li>Envía el PDF final a <b class="text-yellow-300">carlozainea@usta.edu.co</b> para recibir tu certificación.</li>
                         </ol>
+                    </div>
+                     <div class="bg-blue-900/50 p-4 rounded-lg border border-blue-700 mt-6">
+                         <div class="mb-4">
+                            <label for="candidateName" class="block text-sm font-medium text-gray-300 mb-1">Nombre del Candidato:</label>
+                            <input type="text" id="candidateName" placeholder="Ingresa tu nombre completo aquí" class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -192,8 +171,15 @@
             <div id="mission1" class="mission-content">
                 <div class="bg-gray-900 p-8 rounded-xl shadow-lg">
                     <h3 class="text-3xl font-bold text-blue-300 mb-2">Misión 1: Recuperación de Desastres y Auditoría Forense</h3>
-                    <p class="mb-6 text-gray-400">Un `DELETE` accidental eliminó los pedidos pagados con 'Efectivo'. Restaura la tabla `pedidos_bronze` a su estado anterior y documenta las filas exactas recuperadas.</p>
+                    <p class="mb-6 text-gray-400">Demuestra tu dominio de las capacidades de gobernanza de Delta Lake.</p>
                     
+                    <div class="bg-gray-800 p-4 rounded-lg mb-6 border border-gray-700">
+                        <h4 class="font-bold text-lg text-yellow-300">Contexto de Negocio:</h4>
+                        <p class="text-gray-400 mt-2">Un proceso nocturno ejecutó un `DELETE` incorrecto en la tabla `pedidos_bronze`, eliminando todos los registros donde `metodo_pago = 'Efectivo'`. El equipo de operaciones necesita que restaures los datos a su estado original y que proveas un informe forense de las filas exactas que fueron afectadas para la auditoría.</p>
+                        <h4 class="font-bold text-lg text-yellow-300 mt-4">Recursos Necesarios:</h4>
+                        <p class="text-gray-400 mt-2">Cuaderno `sesion_2_auditoria.ipynb` y la tabla `pedidos_bronze`.</p>
+                    </div>
+
                     <h4 class="font-bold text-xl mt-6 mb-2">Paso 1: Query de Cuantificación de Impacto</h4>
                     <p class="text-sm text-gray-500 mb-2">Pega aquí tu query `VERSION AS OF` que compara el conteo de filas antes y después del borrado.</p>
                     <textarea id="m1_query1" class="w-full h-32 p-2 rounded font-mono text-sm" placeholder="SELECT 'Antes' AS estado, COUNT(*) FROM ..."></textarea>
@@ -205,7 +191,7 @@
                     <div id="hint1" class="hint-box"><p>Recuerda que `table_changes()` requiere que el Change Data Feed (CDF) esté habilitado en la tabla. Si la consulta no devuelve resultados, ¡es posible que tengas que ejecutar el `DELETE` de nuevo *después* de habilitar CDF!</p></div>
 
                     <h4 class="font-bold text-xl mt-6 mb-2">Paso 3: Justificación Técnica</h4>
-                    <p class="text-sm text-gray-500 mb-2">Explica brevemente por qué `RESTORE` es la herramienta más segura para esta operación.</p>
+                    <p class="text-sm text-gray-500 mb-2">Explica brevemente por qué `RESTORE` es la herramienta más segura para esta operación de recuperación.</p>
                     <textarea id="m1_justification" class="w-full h-24 p-2 rounded" placeholder="RESTORE es la opción más segura porque crea una nueva transacción de reversión, manteniendo el historial completo intacto para fines de auditoría, a diferencia de..."></textarea>
                 </div>
             </div>
@@ -213,10 +199,15 @@
             <!-- Misión 2 -->
             <div id="mission2" class="mission-content">
                  <div class="bg-gray-900 p-8 rounded-xl shadow-lg">
-                    <h3 class="text-3xl font-bold text-blue-300 mb-2">Misión 2: Diagnóstico y Refactorización</h3>
-                    <p class="mb-4 text-gray-400">Un analista creó una consulta lenta y poco escalable. Diagnostica sus problemas con `EXPLAIN` y reescríbela para máxima eficiencia.</p>
-                    
-                     <h4 class="font-bold text-lg mt-6 mb-2">Consulta Original (Ineficiente):</h4>
+                    <h3 class="text-3xl font-bold text-blue-300 mb-2">Misión 2: Diagnóstico y Refactorización de Consultas</h3>
+                     <div class="bg-gray-800 p-4 rounded-lg mb-6 border border-gray-700">
+                        <h4 class="font-bold text-lg text-yellow-300">Contexto de Negocio:</h4>
+                        <p class="text-gray-400 mt-2">Un analista junior ha creado una consulta para encontrar pedidos de libros de clientes en Madrid. La consulta funciona, pero es extremadamente lenta y no escala. Tu tarea es diagnosticar los problemas de rendimiento usando `EXPLAIN` y reescribir la consulta de forma óptima.</p>
+                        <h4 class="font-bold text-lg text-yellow-300 mt-4">Recursos Necesarios:</h4>
+                        <p class="text-gray-400 mt-2">Cuaderno `sesion_3_planes/optimizador_consultas.ipynb` y las tablas `pedidos_silver`, `usuarios_silver` y `productos_silver`.</p>
+                    </div>
+
+                    <h4 class="font-bold text-lg mt-6 mb-2">Consulta Original (Ineficiente):</h4>
                     <div class="code-block">
                         <button class="copy-btn" onclick="copyToClipboard('m2_original_code')">Copiar</button>
                         <pre id="m2_original_code"><code class="language-sql">SELECT p.id_pedido, u.nombre_usuario, pr.nombre_producto
@@ -244,14 +235,19 @@ AND u.ciudad = 'Madrid';</code></pre>
             <div id="mission3" class="mission-content">
                 <div class="bg-gray-900 p-8 rounded-xl shadow-lg">
                     <h3 class="text-3xl font-bold text-blue-300 mb-2">Misión 3: Mantenimiento Proactivo del Lakehouse</h3>
-                    <p class="mb-4 text-gray-400">Demuestra tu conocimiento de la optimización física de Delta Lake ejecutando tareas de mantenimiento y justificando tus decisiones estratégicas.</p>
+                    <div class="bg-gray-800 p-4 rounded-lg mb-6 border border-gray-700">
+                        <h4 class="font-bold text-lg text-yellow-300">Contexto de Negocio:</h4>
+                        <p class="text-gray-400 mt-2">Para asegurar que el optimizador de consultas siga tomando decisiones inteligentes a lo largo del tiempo, es tu responsabilidad como arquitecto establecer rutinas de mantenimiento. Además, debes guiar a los desarrolladores junior en las mejores prácticas de diseño físico.</p>
+                        <h4 class="font-bold text-lg text-yellow-300 mt-4">Recursos Necesarios:</h4>
+                        <p class="text-gray-400 mt-2">Cuaderno `sesion_3_planes/z_ordenamiento.ipynb` y las tablas `pedidos_silver` y `usuarios_silver`.</p>
+                    </div>
                     
                     <h4 class="font-bold text-xl mt-6 mb-2">Paso 1: Comandos de Mantenimiento</h4>
-                    <p class="text-sm text-gray-500 mb-2">Pega aquí los comandos `OPTIMIZE` (con Z-Ordering) y `ANALYZE TABLE` que ejecutaste sobre `pedidos_silver`.</p>
+                    <p class="text-sm text-gray-500 mb-2">Pega aquí los comandos `OPTIMIZE` (con Z-Ordering) y `ANALYZE TABLE` que ejecutarías sobre `pedidos_silver` para mantener su rendimiento.</p>
                     <textarea id="m3_query1" class="w-full h-24 p-2 rounded font-mono text-sm" placeholder="OPTIMIZE pedidos_silver ZORDER BY (id_usuario, id_producto);&#10;ANALYZE TABLE pedidos_silver COMPUTE STATISTICS FOR ALL COLUMNS;"></textarea>
                     
                     <h4 class="font-bold text-xl mt-6 mb-2">Paso 2: Justificación Técnica (Particionamiento vs. Z-Ordering)</h4>
-                    <p class="text-sm text-gray-500 mb-2">Un desarrollador junior propone particionar `usuarios_silver` por `ciudad` (columna de alta cardinalidad). Explica detalladamente por qué `ZORDER BY (ciudad)` es una estrategia muy superior.</p>
+                    <p class="text-sm text-gray-500 mb-2">Un desarrollador junior propone particionar `usuarios_silver` por `ciudad` (una columna de alta cardinalidad). Explica detalladamente por qué `ZORDER BY (ciudad)` es una estrategia muy superior para optimizar los filtros por ciudad.</p>
                     <textarea id="m3_justification" class="w-full h-32 p-2 rounded" placeholder="Particionar por una columna de alta cardinalidad como 'ciudad' es una mala práctica porque generaría un problema de 'archivos pequeños' (small files problem), donde... En cambio, Z-Ordering agrupa los datos relacionados dentro de archivos más grandes, permitiendo un 'file skipping' eficiente sin..."></textarea>
                     <button class="text-sm text-yellow-400 hover:text-yellow-300 mt-2" onclick="toggleHint('hint3')">Ver Pista</button>
                     <div id="hint3" class="hint-box"><p>Piensa en la cardinalidad. Particionar crea directorios. Si hay miles de ciudades, crearías miles de directorios, la mayoría con muy pocos datos. Z-Ordering, en cambio, ordena los datos dentro de los archivos existentes, lo cual es mucho más eficiente para columnas con muchos valores únicos.</p></div>
@@ -262,18 +258,20 @@ AND u.ciudad = 'Madrid';</code></pre>
             <div id="mission4" class="mission-content">
                  <div class="bg-gray-900 p-8 rounded-xl shadow-lg">
                     <h3 class="text-3xl font-bold text-blue-300 mb-2">Misión 4: Creando Valor con SQL Analítico</h3>
-                    <p class="mb-4 text-gray-400">El equipo de marketing necesita un reporte complejo de "Inteligencia de Clientes". Constrúyelo en una sola consulta usando CTEs y funciones de ventana.</p>
+                     <div class="bg-gray-800 p-4 rounded-lg mb-6 border border-gray-700">
+                        <h4 class="font-bold text-lg text-yellow-300">Contexto de Negocio:</h4>
+                        <p class="text-gray-400 mt-2">El equipo de marketing necesita un reporte de "Inteligencia de Clientes" para entender patrones de compra. Debes construirlo en una sola consulta eficiente, utilizando técnicas de SQL avanzado para evitar múltiples pasos y tablas intermedias.</p>
+                         <h4 class="font-bold text-lg text-yellow-300 mt-4">Requisitos del Reporte:</h4>
+                        <ul class="list-disc list-inside ml-4 text-gray-400">
+                            <li>Para cada `id_usuario`, calcula: `total_gastado`, `numero_pedidos`, `pedido_mas_caro`, y `dias_promedio_entre_compras`.</li>
+                        </ul>
+                    </div>
                     
-                    <h4 class="font-bold text-lg mt-6 mb-2">Requisitos del Reporte:</h4>
-                    <ul class="list-disc list-inside ml-4 mb-4 text-gray-400">
-                        <li>Por cada `id_usuario`, calcula: `total_gastado`, `numero_pedidos`, `pedido_mas_caro`, y `dias_promedio_entre_compras`.</li>
-                    </ul>
-
                     <h4 class="font-bold text-xl mt-6 mb-2">Paso 1: Consulta Completa de Inteligencia de Clientes</h4>
-                    <p class="text-sm text-gray-500 mb-2">Pega aquí tu consulta final, bien comentada, usando CTEs y funciones de ventana como `LAG()`.</p>
+                    <p class="text-sm text-gray-500 mb-2">Pega aquí tu consulta final, bien comentada, usando CTEs para organizar la lógica y funciones de ventana como `LAG()` para los cálculos entre filas.</p>
                     <textarea id="m4_query1" class="w-full h-64 p-2 rounded font-mono text-sm" placeholder="WITH CalculoPrevios AS (&#10;  SELECT&#10;    id_usuario,&#10;    ts_pedido,&#10;    LAG(ts_pedido, 1) OVER (PARTITION BY id_usuario ORDER BY ts_pedido) AS pedido_anterior&#10;  FROM pedidos_silver&#10;), ..."></textarea>
                     <button class="text-sm text-yellow-400 hover:text-yellow-300 mt-2" onclick="toggleHint('hint4')">Ver Pista</button>
-                    <div id="hint4" class="hint-box"><p>Estructura tu solución en dos CTEs. La primera CTE (`PedidosConLag`) debería calcular la fecha del pedido anterior para cada pedido de un cliente. La segunda CTE (`PedidosConDiferencia`) debería calcular la diferencia en días. La consulta final agrupará los resultados de la segunda CTE para obtener los agregados finales.</p></div>
+                    <div id="hint4" class="hint-box"><p>Estructura tu solución en dos o tres CTEs. La primera (`PedidosConLag`) puede usar `LAG()` para obtener el `ts_pedido` anterior. La segunda (`DiferenciasPedidos`) puede calcular la diferencia de días. La consulta final agrupará los resultados y unirá con una CTE inicial que calcule los agregados simples (`total_gastado`, etc.).</p></div>
                 </div>
             </div>
 
@@ -285,7 +283,7 @@ AND u.ciudad = 'Madrid';</code></pre>
                     <div class="max-w-md mx-auto">
                         <div class="mb-4">
                             <label for="candidateNameFinal" class="block text-sm font-medium text-gray-300 mb-1">Nombre del Candidato:</label>
-                            <input type="text" id="candidateNameFinal" placeholder="Ingresa tu nombre completo aquí" class="w-full p-2 rounded bg-gray-800 border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+                            <input type="text" id="candidateNameFinal" placeholder="Ingresa tu nombre completo aquí" class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                         <button id="generateReportBtnFinal" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-transform transform hover:scale-105">
                             Generar Mi Informe Ahora
@@ -417,10 +415,12 @@ AND u.ciudad = 'Madrid';</code></pre>
             window.print();
             document.getElementById('printable-report').style.display = 'none';
         }
-
+        
+        // This button might not exist in this version, but check to be safe
         if (generateReportBtn) {
             generateReportBtn.addEventListener('click', generateReport);
         }
+
         if (generateReportBtnFinal) {
             generateReportBtnFinal.addEventListener('click', generateReport);
         }
