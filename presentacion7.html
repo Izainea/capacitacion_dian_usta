@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 7: Más Allá de lo Relacional - La Evolución del Lakehouse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #111827; /* bg-gray-900 */
+        }
+        section { 
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out; 
+            width: 100%;
+            padding: 2rem; /* Añadir padding para que el contenido no esté pegado al borde */
+        }
+        section.active { 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .diagram-container { 
+            min-height: 400px; /* Ajustar altura mínima para más espacio */
+            width: 100%; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .content-box {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-top: 8px solid #22c55e; /* border-green-500 */
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            width: 100%;
+        }
+        .code-block {
+            background-color: #0d1117;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            border: 1px solid #30363d;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #4b5563; /* border-gray-600 */
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: #374151; /* bg-gray-700 */
+            font-weight: bold;
+        }
+        .highlight-red { color: #ef4444; } /* text-red-500 */
+        .highlight-green { color: #22c55e; } /* text-green-500 */
+    </style>
+</head>
+<body class="text-white flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <main class="w-full max-w-6xl mx-auto">
+        
+        <section><div class="content-box text-center"><h2 class="text-6xl font-black text-white mb-4 tracking-tight">Sesión 7: Más Allá de lo Relacional</h2><p class="text-2xl text-gray-300 mb-6"><b>La Evolución del Lakehouse: Modelos Documental, Grafo y Vectorial</b></p><p class="text-xl text-green-400">Desbloqueando el Poder de la IA y los Datos No Estructurados en Databricks</p></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Agenda de la Sesión</h2><ol class="list-decimal list-inside space-y-4 text-xl text-gray-300"><li><b>La Realidad de los Datos:</b> ¿Por qué lo relacional no siempre es suficiente?</li><li><b>El "Lakehouse Multi-Modelo":</b> Introducción a Documentos, Grafos y Vectores.</li><li><b>Del Texto al Conocimiento:</b> Construyendo nuestro grafo de entidades con IA.</li><li><b>El Cerebro de la Búsqueda:</b> Implementando un motor de búsqueda semántica con vectores.</li><li><b>Conclusiones:</b> La Arquitectura Unificada del Lakehouse Moderno.</li></ol></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Desafío: Datos del Mundo Real</h2><p class="text-xl text-gray-400 text-center mb-8">Nuestro dataset de noticias: un torrente de texto, metadatos y relaciones implícitas. <br class="hidden md:block">¿Cómo lo convertimos en conocimiento accionable?</p><div class="grid md:grid-cols-2 gap-8 items-center"><div class="code-block"><pre><code class="language-sql">-- Vista simplificada de 'noticias_silver'
++--------------------+--------------------------------+--------------------------+
+| id_noticia         | titulo                         | contenido                |
++--------------------+--------------------------------+--------------------------+
+| abc1234            | Operador de grúa...            | Tras una agresión de...  |
+| def5678            | La Policía de Cúcuta...        | Un operativo en Los...   |
++--------------------+--------------------------------+--------------------------+
+</code></pre></div><div class="text-xl text-gray-300"><b>La Limitación Relacional:</b><br>Las bases de datos relacionales son geniales para datos estructurados, pero...<br><br>🚨 ¿Cómo busco por *significado*?<br>🚨 ¿Cómo encuentro *conexiones* entre personas y eventos?<br>🚨 ¿Cómo adapto mi esquema a *nuevos tipos de datos*?</div></div><p class="text-lg text-red-400 mt-6 text-center">¡Conflicto! El modelo relacional es rígido para la complejidad del lenguaje natural.</p></div></section>
+
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">La Filosofía "Multi-Modelo"</h2><p class="text-2xl text-gray-300 max-w-3xl mx-auto">Imagina una caja de herramientas: ¿usarías un martillo para atornillar? ¡Claro que no!</p><p class="text-xl text-gray-400 mt-4">De la misma forma, no todos los problemas de datos se resuelven mejor con el modelo relacional. Necesitamos la herramienta adecuada para cada trabajo.</p><br><p class="text-3xl font-extrabold text-green-400 mb-6">El Lakehouse: Una Caja de Herramientas Completa</p><br>
+        
+        <p class="text-lg text-gray-300">Databricks nos permite combinar los mundos de datos relacionales, documentales, de grafos y vectoriales, todo en una única plataforma.</p></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Modelo 1: El Documento (La Noticia como Entidad Completa)</h2><div class="grid md:grid-cols-2 gap-8 items-center"><p class="text-lg text-gray-300">Una noticia es, por naturaleza, un documento. En lugar de romperla en tablas pequeñas, la tratamos como una unidad cohesiva. Delta Lake soporta tipos de datos `STRUCT` y `ARRAY` perfectamente.</p><p class="text-xl text-green-400 font-bold mb-4">¿Por qué Documental?</p><ul class="list-disc list-inside text-lg text-gray-300 space-y-2"><li>✅ Lecturas Rápidas: Obtener una noticia completa es una sola lectura.</li><li>✅ Flexibilidad: Fácilmente añade nuevos campos sin alterar el esquema.</li><li>✅ Coherencia: Mantener la información relacionada junta.</li></ul></div><div class="code-block mt-8"><pre><code class="language-sql">-- NOTICIAS_SILVER (ejemplo de estructura documental)
+CREATE OR REPLACE TABLE noticias_silver (
+  id_noticia STRING,
+  titulo STRING,
+  contenido STRING,
+  fecha TIMESTAMP,
+  enlace STRING,
+  metadatos STRUCT<
+    fuente STRING,
+    categoria ARRAY<STRING>,
+    autor STRING,
+    fecha_ingesta TIMESTAMP
+  >
+);
+
+-- Consulta para acceder a los metadatos como en un documento JSON
+SELECT
+  titulo,
+  metadatos.fuente AS fuente_noticia,
+  metadatos.categoria[0] AS categoria_principal
+FROM noticias_silver
+WHERE metadatos.categoria[0] = 'Actualidad'
+LIMIT 2;
+</code></pre></div><p class="text-lg text-gray-400 mt-6 text-center">Metáfora: Piensa en la noticia como un expediente único con toda su información organizada internamente.</p></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Modelo 2: El Grafo (El Mapa de Conexiones)</h2><div class="grid md:grid-cols-2 gap-8 items-center"><p class="text-lg text-gray-300">Más allá de la noticia individual, ¿cómo se conectan las cosas? Las personas, organizaciones, eventos y ubicaciones están interconectados. Un modelo de grafo representa estas relaciones explícitamente.</p><p class="text-xl text-green-400 font-bold mb-4">¿Por qué Grafos?</p><ul class="list-disc list-inside text-lg text-gray-300 space-y-2"><li>✅ Descubrimiento de Relaciones: Identifica quién está conectado a quién y cómo.</li><li>✅ Análisis de Redes: Influencia, comunidades, patrones de fraude.</li><li>✅ Preguntas Complejas: "¿Quiénes son los asociados de X, que también estuvieron en el evento Y?"</li></ul></div><div id="diagram-graph" class="diagram-container mt-8"></div><p class="text-lg text-gray-400 mt-6 text-center">Metáfora: Un grafo es el "GPS" de tu información, mostrándote no solo dónde están las cosas, sino cómo llegar de una a otra.</p></div></section>
+        
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">La Magia: De Texto a Grafo con IA (NER y Relaciones)</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Construir un grafo manualmente sería imposible. Aquí es donde la Inteligencia Artificial entra en juego.</p><p class="text-xl text-gray-400 mt-4 mb-6">Usamos un Modelo de Lenguaje Grande (LLM) para que lea cada noticia y automáticamente extraiga:</p><ul class="list-disc list-inside text-xl text-green-300 space-y-2 mt-4 inline-block text-left"><li>Nodos: Entidades (Personas, Organizaciones, Lugares).</li><li>Aristas: Las relaciones entre esas entidades (trabaja_en, asistió_a, reportó_sobre).</li></ul><br>
+        
+        <div class="code-block mt-6"><pre><code class="language-sql">-- Ejemplo de extracción de entidades con ai_extract()
+SELECT
+  titulo,
+  ai_extract(contenido, ARRAY('person', 'organization', 'location', 'event')) AS entidades_extraidas
+FROM noticias_silver
+LIMIT 1;
+</code></pre></div><p class="text-lg text-green-400 mt-6 text-center">¡Transformamos datos no estructurados en una red estructurada de conocimiento!</p></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Modelo 3: El Vector (El Cerebro de la Búsqueda Semántica)</h2><div class="grid md:grid-cols-2 gap-8 items-center"><p class="text-lg text-gray-300">Si los documentos son el expediente y los grafos son el GPS, los vectores son el "ADN del significado". Convierten texto en listas de números (embeddings) que capturan su esencia contextual.</p><p class="text-xl text-green-400 font-bold mb-4">¿Por qué Vectores?</p><ul class="list-disc list-inside text-lg text-gray-300 space-y-2"><li>✅ Búsqueda por Significado: Encuentra contenido relevante aunque no contenga las palabras exactas.</li><li>✅ Recomendaciones Inteligentes: "Si te gustó esto, te gustará aquello".</li><li>✅ Fundamento para RAG (Retrieval Augmented Generation): Potencia chatbots y IA generativa.</li></ul></div><div id="diagram-vectors" class="diagram-container mt-8"></div><p class="text-lg text-gray-400 mt-6 text-center">Metáfora: Cada noticia se convierte en un punto en un "espacio de significado" gigante. Las noticias con significados similares están cerca unas de otras.</p></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Pipeline de Búsqueda Semántica en Databricks</h2><p class="text-lg text-gray-400 text-center mb-8">Un enfoque de extremo a extremo para transformar texto en conocimiento buscable.</p><div id="diagram-vector-pipeline" class="diagram-container"></div><ol class="list-decimal list-inside text-lg text-gray-300 mt-6 space-y-2"><li><b>Fuente de Datos:</b> Noticias en formato Delta Lake (`noticias_silver`).</li><li><b>Generación de Embeddings:</b> `ai_query()` en SQL convierte cada noticia en un `contenido_vector` en `noticias_gold`.</li><li><b>Indexación:</b> Un índice de Vector Search (gestionado con `VectorSearchClient`) organiza eficientemente estos vectores.</li><li><b>Pregunta del Usuario:</b> También se convierte en un vector.</li><li><b>Búsqueda de Similitud:</b> El índice encuentra los vectores (noticias) más cercanos al vector de la pregunta.</li><li><b>Resultados:</b> La información relevante se devuelve al usuario.</li></ol></div></section>
+
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">¡El Gran Aprendizaje! SQL vs. Python UDFs</h2><p class="text-xl text-gray-400 text-center mb-8">Encontramos el camino fácil (y el difícil) para generar embeddings a escala.</p><table class="comparison-table text-xl"><thead><tr><th>Característica</th><th>UDF de Python (`@pandas_udf`)</th><th>SQL (`ai_query()`)</th></tr></thead><tbody><tr><td><b>Complejidad</b></td><td><span class="highlight-red">Alta:</span> Serialización, autenticación distribuida, dependencias.</td><td><span class="highlight-green">Baja:</span> Una simple función SQL.</td></tr><tr><td><b>Rendimiento</b></td><td>Bueno, pero puede tener sobrecarga de serialización.</td><td><span class="highlight-green">Óptimo:</span> Integración nativa y optimizada por Databricks.</td></tr><tr><td><b>Mantenimiento</b></td><td>Más código Python, más puntos de fallo.</td><td><span class="highlight-green">Sencillo:</span> Declarativo en SQL.</td></tr><tr><td><b>Compatibilidad</b></td><td>Desafíos con "Serverless Compute" sin `sparkContext`.</td><td><span class="highlight-green">Excelente:</span> Funciona en todos los tipos de cómputo.</td></tr><tr><td><b>Recomendado para...</b></td><td>Lógica Python compleja no disponible en SQL.</td><td><span class="highlight-green">Generación de Embeddings y Llamadas a LLMs.</span></td></tr></tbody></table><p class="text-lg text-green-400 mt-6 text-center">Lección: ¡Si puedes hacerlo en SQL con `ai_query`, HAZLO! Es más simple, rápido y robusto.</p></div></section>
+
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">La Arquitectura Lakehouse Multi-Modelo</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Hemos evolucionado de un simple almacén de datos a un Lakehouse inteligente capaz de manejar cualquier tipo de dato y caso de uso.</p><br>
+        
+        <div class="mt-6 flex justify-center flex-wrap gap-4"><div class="bg-blue-500/20 border border-blue-400 text-blue-300 rounded-full px-4 py-2">Datos Relacionales (Tablas Delta)</div><div class="bg-purple-500/20 border border-purple-400 text-purple-300 rounded-full px-4 py-2">Modelo Documental (STRUCT/ARRAY)</div><div class="bg-red-500/20 border border-red-400 text-red-300 rounded-full px-4 py-2">Modelo de Grafo (Entidades y Relaciones)</div><div class="bg-green-500/20 border border-green-400 text-green-300 rounded-full px-4 py-2">Modelo Vectorial (Búsqueda Semántica)</div><div class="bg-yellow-500/20 border border-yellow-400 text-yellow-300 rounded-full px-4 py-2">Inteligencia Artificial (LLMs, Embeddings)</div></div></div></section>
+        
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Conclusiones de la Sesión y del Curso</h2><ul class="list-disc list-inside space-y-4 text-xl text-gray-300"><li>El modelo relacional es poderoso, pero los datos modernos requieren un enfoque multi-modelo.</li><li>La plataforma Lakehouse en Databricks es fundamentalmente flexible para implementar todos estos patrones (Documento, Grafo, Vector) de forma nativa.</li><li>La Inteligencia Artificial ya no es un paso final. Es una parte integral del pipeline de ingeniería de datos para transformar datos brutos en conocimiento accionable.</li><li>Dominar el Lakehouse significa dominar la convergenica de datos e IA.</li></ul><br>
+        
+        <p class="text-3xl font-extrabold text-green-400 mt-6 text-center">¡Están listos para construir el futuro de los datos y la IA!</p></div></section>
+
+        <section><div class="content-box text-center"><h2 class="text-6xl font-black text-white tracking-tight">¡Gracias por su Atención!</h2><p class="text-xl text-gray-300 mt-4">¿Preguntas? | ¡Fue un placer acompañarlos en este viaje!</p><br>
+        
+        </div></section>
+    </main>
+    
+    <div class="fixed bottom-8 flex space-x-4 z-10">
+        <button id="prevBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+        <div id="slide-counter" class="text-lg font-bold flex items-center justify-center px-4"></div>
+        <button id="nextBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
+    </div>
+    
+    <script>
+        // --- Funciones de Dibujo de Diagramas D3.js ---
+
+        function drawForceDirectedGraph(containerId, nodesData, linksData, width = 500, height = 400) {
+            d3.select(containerId).select("svg").remove();
+            const svg = d3.select(containerId).append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`);
+            
+            // Usamos copias para que D3 no modifique los datos originales en cada render
+            const nodes = JSON.parse(JSON.stringify(nodesData));
+            const links = JSON.parse(JSON.stringify(linksData));
+
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+                .force("charge", d3.forceManyBody().strength(-400))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("x", d3.forceX(width / 2).strength(0.05))
+                .force("y", d3.forceY(height / 2).strength(0.05));
+
+            // Flechas para las aristas
+            svg.append("defs").selectAll("marker")
+                .data(["end"]) // Solo una flecha por ahora
+                .join("marker")
+                .attr("id", String)
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 20) // Ajustar para que la flecha no se solape con el nodo
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5")
+                .attr("fill", "#6b7280"); // color-gray-500
+
+            const link = svg.append("g")
+                .attr("stroke", "#6b7280") // color-gray-500
+                .attr("stroke-opacity", 0.6)
+                .selectAll("line")
+                .data(links)
+                .join("line")
+                .attr("stroke-width", 2)
+                .attr("marker-end", "url(#end)");
+
+            const linkText = svg.append("g")
+                .selectAll("text")
+                .data(links)
+                .join("text")
+                .attr("fill", "#a7f3d0") // color-green-200
+                .style("font-size", "10px")
+                .style("pointer-events", "none") // No interferir con clics en nodos
+                .text(d => d.label || "");
+
+            const node = svg.append("g")
+                .selectAll("g")
+                .data(nodes)
+                .join("g")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            node.append("circle")
+                .attr("r", d => d.radius || 20)
+                .attr("fill", d => d.color || "#4ade80") // color-green-400
+                .attr("stroke", "#111827") // bg-gray-900
+                .attr("stroke-width", 2);
+            
+            node.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "central") // Centrar verticalmente
+                .attr("fill", "black")
+                .style("font-size", "12px")
+                .style("font-weight", "bold")
+                .style("pointer-events", "none")
+                .text(d => d.id);
+
+            simulation.on("tick", () => {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                linkText
+                    .attr("x", d => (d.source.x + d.target.x) / 2)
+                    .attr("y", d => (d.source.y + d.target.y) / 2 - 8);
+
+                node.attr("transform", d => `translate(${d.x},${d.y})`);
+            });
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        }
+
+        function drawVectorSpace(containerId, width = 500, height = 400) {
+            d3.select(containerId).select("svg").remove();
+            const svg = d3.select(containerId).append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`);
+            
+            const data = [
+                { id: "Economía", x: 100, y: 100, color: "#f87171", type: "topic" }, // Red
+                { id: "Inflación", x: 130, y: 130, color: "#f87171", type: "subtopic" },
+                { id: "Bolsa de Valores", x: 80, y: 140, color: "#f87171", type: "subtopic" },
+                { id: "Deportes", x: 400, y: 300, color: "#60a5fa", type: "topic" }, // Blue
+                { id: "Fútbol", x: 370, y: 270, color: "#60a5fa", type: "subtopic" },
+                { id: "Olimpiadas", x: 420, y: 260, color: "#60a5fa", type: "subtopic" },
+                { id: "Pregunta del Usuario", x: 160, y: 160, color: "#facc15", radius: 15, type: "query" } // Yellow
+            ];
+
+            // Cluster de Economía
+            svg.append("circle").attr("cx", 100).attr("cy", 120).attr("r", 70).attr("stroke", "#ef4444").attr("stroke-dasharray", "4,4").attr("fill", "#ef444420");
+
+            // Cluster de Deportes
+            svg.append("circle").attr("cx", 400).attr("cy", 280).attr("r", 70).attr("stroke", "#3b82f6").attr("stroke-dasharray", "4,4").attr("fill", "#3b82f620");
+
+            svg.selectAll("circle.data-point").data(data).join("circle").attr("class", "data-point")
+                .attr("cx", d => d.x).attr("cy", d => d.y).attr("r", d => d.radius || 8)
+                .attr("fill", d => d.color)
+                .attr("stroke", "#111827").attr("stroke-width", 1.5);
+
+            svg.selectAll("text.data-label").data(data).join("text").attr("class", "data-label")
+                .attr("x", d => d.x + (d.type === "query" ? 20 : 12))
+                .attr("y", d => d.y + 4)
+                .attr("fill", "white").style("font-size", "12px").style("font-weight", "bold")
+                .text(d => d.id);
+            
+            // Línea de similitud para la pregunta
+            svg.append("line")
+                .attr("x1", data[6].x).attr("y1", data[6].y) // Pregunta
+                .attr("x2", data[1].x).attr("y2", data[1].y) // Inflación (ejemplo de similitud)
+                .attr("stroke", "#facc15").attr("stroke-dasharray", "2,2").attr("stroke-width", 2);
+            svg.append("text").attr("x", (data[6].x + data[1].x) / 2 + 5)
+                .attr("y", (data[6].y + data[1].y) / 2 - 10)
+                .attr("fill", "#facc15").style("font-size", "10px").text("Alta Similitud");
+
+            svg.append("text").attr("x", width/2).attr("y", height - 20).attr("text-anchor", "middle")
+                .attr("fill", "#9ca3af").style("font-size", "10px").text("Espacio Vectorial N-dimensional");
+        }
+        
+        function drawPipeline(containerId, width = 800, height = 450) {
+            d3.select(containerId).select("svg").remove();
+            const svg = d3.select(containerId).append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`);
+            const steps = [
+                { id: "1. Noticias\n(Delta Lake)", x: 100, y: 100, color: "#3b82f6", type: "source" }, // Blue
+                { id: "2. Generación de Embeddings\n(ai_query)", x: 300, y: 100, color: "#ef4444", type: "process" }, // Red
+                { id: "3. Tabla Gold\n(con Vectores)", x: 500, y: 100, color: "#3b82f6", type: "data" }, // Blue
+                { id: "4. Índice de Búsqueda Vectorial", x: 700, y: 100, color: "#8b5cf6", type: "index" }, // Purple
+                { id: "5. Pregunta del Usuario", x: 300, y: 300, color: "#facc15", type: "input" }, // Yellow
+                { id: "6. Resultados\n(Noticias relevantes)", x: 700, y: 300, color: "#22c55e", type: "output" } // Green
+            ];
+            
+            svg.append("defs").append("marker").attr("id", "arrow").attr("viewBox", "0 -5 10 10").attr("refX", 15).attr("refY", 0).attr("markerWidth", 4).attr("markerHeight", 4).attr("orient", "auto").append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#9ca3af");
+
+            const links = [
+                { source: steps[0], target: steps[1] },
+                { source: steps[1], target: steps[2] },
+                { source: steps[2], target: steps[3] },
+                { source: steps[4], target: steps[1], label: "Vectorizar Pregunta" },
+                { source: steps[4], target: steps[3], label: "Buscar Similaridad" },
+                { source: steps[3], target: steps[5], label: "Devolver Resultados" }
+            ];
+
+            svg.append("g").selectAll("line").data(links).join("line")
+                .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x).attr("y2", d => d.target.y)
+                .attr("stroke", "#9ca3af").attr("stroke-width", 2).attr("marker-end", "url(#arrow)");
+            
+            svg.append("g").selectAll("text.link-label").data(links).join("text").attr("class", "link-label")
+                .attr("x", d => (d.source.x + d.target.x) / 2)
+                .attr("y", d => (d.source.y + d.target.y) / 2 - 10)
+                .attr("fill", "#9ca3af").style("font-size", "10px").text(d => d.label || "");
+
+            const node = svg.append("g").selectAll("g").data(steps).join("g")
+                .attr("transform", d => `translate(${d.x}, ${d.y})`);
+
+            node.append("rect").attr("x", -90).attr("y", -40).attr("width", 180).attr("height", 80)
+                .attr("fill", d => d.color).attr("rx", 10).attr("ry", 10);
+            node.append("text").text(d => d.id).attr("text-anchor", "middle").attr("dy", "0.3em").attr("fill", "white").style("font-weight", "bold").style("font-size", "14px").attr("white-space", "pre-line");
+        }
+
+        // --- Lógica de Presentación ---
+        const slides = document.querySelectorAll('main > section');
+        let currentSlide = 0;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slide-counter');
+        
+        function drawVisibleDiagram() {
+            const activeSlide = slides[currentSlide];
+            if (!activeSlide) return;
+            const container = activeSlide.querySelector('.diagram-container');
+            if (!container) return;
+            
+            // Limpiar SVG anterior antes de dibujar uno nuevo
+            d3.select(container).select("svg").remove();
+
+            switch(container.id) {
+                case 'diagram-graph':
+                    drawForceDirectedGraph(`#${container.id}`, 
+                        [ 
+                            {id: "Policía", color: "#60a5fa", radius: 25}, 
+                            {id: "Cúcuta", color: "#facc15", radius: 20}, 
+                            {id: "Los Patios", color: "#facc15", radius: 20},
+                            {id: "Delincuencia", color: "#ef4444", radius: 28},
+                            {id: "Capturados", color: "#a7f3d0", radius: 25}
+                        ],
+                        [ 
+                            {source: "Policía", target: "Cúcuta", label: "OPERA_EN"}, 
+                            {source: "Policía", target: "Delincuencia", label: "COMBATE"},
+                            {source: "Cúcuta", target: "Los Patios", label: "INCLUYE"},
+                            {source: "Policía", target: "Capturados", label: "REALIZA"},
+                            {source: "Delincuencia", target: "Los Patios", label: "AFECTA_A"}
+                        ]
+                    );
+                    break;
+                case 'diagram-vectors':
+                    drawVectorSpace(`#${container.id}`);
+                    break;
+                case 'diagram-vector-pipeline':
+                    drawPipeline(`#${container.id}`);
+                    break;
+            }
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === slides.length - 1;
+            slideCounter.textContent = `${index + 1} / ${slides.length}`;
+            drawVisibleDiagram(); // Redibujar el diagrama para la diapositiva activa
+        }
+        
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } });
+        nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } });
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextBtn.click(); 
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevBtn.click();
+            }
+        });
+        
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>
