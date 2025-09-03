@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Certificación: Arquitecto de Datos SQL & Databricks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        .mission-tab {
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+        .mission-tab.active {
+            border-color: #3b82f6;
+            color: white;
+            background-color: #1e3a8a;
+        }
+        .mission-content {
+            display: none;
+        }
+        .mission-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .code-block {
+            background-color: #1e293b;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            border: 1px solid #334155;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #475569;
+            color: #e2e8f0;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+        .code-block:hover .copy-btn {
+            opacity: 1;
+        }
+        .copy-btn:hover {
+            background-color: #64748b;
+        }
+        textarea {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .hint-box {
+            display: none;
+            background-color: #1e293b;
+            border-left: 4px solid #facc15;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            border-radius: 0.25rem;
+        }
+        /* Report Styles */
+        #report-content h2 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1e3a8a;
+            border-bottom: 2px solid #93c5fd;
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        #report-content h3 {
+             font-size: 1.25rem;
+             font-weight: bold;
+             margin-top: 1rem;
+             color: #1d4ed8;
+        }
+         #report-content pre {
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #111827;
+            font-family: monospace;
+        }
+        #report-content .justification {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            border-radius: 0.25rem;
+            color: #1f2937;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printable-report, #printable-report * { visibility: visible; }
+            #printable-report { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body class="bg-gray-800 text-gray-200">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8 bg-gray-900 p-6 rounded-xl shadow-lg border-b-4 border-blue-500">
+            <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight">Plataforma de Certificación</h1>
+            <p class="text-xl text-blue-300 mt-2">Arquitecto de Datos: SQL & Databricks Avanzado</p>
+        </header>
+        
+        <div class="bg-gray-900 p-6 rounded-xl shadow-lg mb-8">
+            <h2 class="text-2xl font-bold text-blue-300 mb-4">Instrucciones para el Candidato</h2>
+            <div class="grid md:grid-cols-2 gap-6 items-center">
+                <div>
+                    <p class="mb-2">¡Bienvenido al desafío final! Esta es tu oportunidad para demostrar las habilidades de un verdadero Arquitecto de Datos. Completa las 4 misiones a continuación utilizando tus cuadernos de Databricks.</p>
+                    <p class="mb-2">
+                        <ul class="list-disc list-inside ml-4">
+                            <li>Analiza el problema de negocio.</li>
+                            <li>Escribe y prueba el código SQL necesario.</li>
+                            <li>Documenta tus soluciones y justificaciones en las áreas de texto provistas.</li>
+                        </ul>
+                    </p>
+                    <p class="font-bold mt-4">Al finalizar, genera tu informe de resultados y envíalo como PDF a <span class="text-yellow-300">carlozainea@usta.edu.co</span> para completar tu certificación.</p>
+                </div>
+                <div class="bg-blue-900/50 p-4 rounded-lg border border-blue-700">
+                     <div class="mb-4">
+                        <label for="candidateName" class="block text-sm font-medium text-gray-300 mb-1">Nombre del Candidato:</label>
+                        <input type="text" id="candidateName" placeholder="Ingresa tu nombre completo aquí" class="w-full p-2 rounded bg-gray-800 border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <button id="generateReportBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+                        Generar Informe de Resultados para Envío
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Mission Tabs -->
+        <div class="flex flex-wrap border-b border-gray-700 mb-6">
+            <button class="mission-tab py-3 px-6 text-lg font-bold active" data-target="mission0">Bienvenida</button>
+            <button class="mission-tab py-3 px-6 text-lg font-bold" data-target="mission1">Misión 1</button>
+            <button class="mission-tab py-3 px-6 text-lg font-bold" data-target="mission2">Misión 2</button>
+            <button class="mission-tab py-3 px-6 text-lg font-bold" data-target="mission3">Misión 3</button>
+            <button class="mission-tab py-3 px-6 text-lg font-bold" data-target="mission4">Misión 4</button>
+            <button class="mission-tab py-3 px-6 text-lg font-bold" data-target="mission5">Informe Final</button>
+        </div>
+
+        <!-- Mission Content -->
+        <div id="missions-container">
+            <!-- Misión 0: Bienvenida -->
+            <div id="mission0" class="mission-content active">
+                <div class="bg-gray-900 p-8 rounded-xl shadow-lg">
+                    <h3 class="text-3xl font-bold text-blue-300 mb-4">Bienvenido al Desafío Final</h3>
+                    <p class="mb-4 text-gray-400 text-lg">Esta es tu oportunidad para demostrar las habilidades de un verdadero Arquitecto de Datos. El objetivo es validar y aplicar de manera práctica las competencias avanzadas en diseño, optimización y análisis en Databricks.</p>
+                    <div class="bg-gray-800 p-6 rounded-lg mt-6 border border-gray-700">
+                        <h4 class="font-bold text-xl mb-3 text-yellow-300">¿Cómo funciona?</h4>
+                        <ol class="list-decimal list-inside space-y-2 text-gray-300">
+                            <li>Navega a través de las 4 misiones usando las pestañas de arriba.</li>
+                            <li>Lee atentamente el contexto de negocio y los retos técnicos de cada misión.</li>
+                            <li>Utiliza tus cuadernos de Databricks para desarrollar y probar tus soluciones SQL.</li>
+                            <li>Documenta tus queries y justificaciones en las áreas de texto provistas en cada misión.</li>
+                            <li>Si necesitas ayuda, cada misión tiene pistas que puedes revelar.</li>
+                            <li>Cuando hayas completado todas las misiones, ve a la pestaña "Informe Final", ingresa tu nombre y genera tu reporte.</li>
+                            <li>Guarda el informe como PDF (`Ctrl+P` o `Cmd+P` -> Guardar como PDF) y envíalo a <b class="text-yellow-300">carlozainea@usta.edu.co</b> para completar tu certificación.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Misión 1 -->
+            <div id="mission1" class="mission-content">
+                <div class="bg-gray-900 p-8 rounded-xl shadow-lg">
+                    <h3 class="text-3xl font-bold text-blue-300 mb-2">Misión 1: Recuperación de Desastres y Auditoría Forense</h3>
+                    <p class="mb-6 text-gray-400">Un `DELETE` accidental eliminó los pedidos pagados con 'Efectivo'. Restaura la tabla `pedidos_bronze` a su estado anterior y documenta las filas exactas recuperadas.</p>
+                    
+                    <h4 class="font-bold text-xl mt-6 mb-2">Paso 1: Query de Cuantificación de Impacto</h4>
+                    <p class="text-sm text-gray-500 mb-2">Pega aquí tu query `VERSION AS OF` que compara el conteo de filas antes y después del borrado.</p>
+                    <textarea id="m1_query1" class="w-full h-32 p-2 rounded font-mono text-sm" placeholder="SELECT 'Antes' AS estado, COUNT(*) FROM ..."></textarea>
+                    
+                    <h4 class="font-bold text-xl mt-6 mb-2">Paso 2: Query de Informe Forense (CDF)</h4>
+                    <p class="text-sm text-gray-500 mb-2">Pega aquí tu query `table_changes()` que muestra las filas exactas que fueron eliminadas/recuperadas.</p>
+                    <textarea id="m1_query2" class="w-full h-40 p-2 rounded font-mono text-sm" placeholder="SELECT * FROM table_changes(...) WHERE _change_type = 'delete';"></textarea>
+                    <button class="text-sm text-yellow-400 hover:text-yellow-300 mt-2" onclick="toggleHint('hint1')">Ver Pista</button>
+                    <div id="hint1" class="hint-box"><p>Recuerda que `table_changes()` requiere que el Change Data Feed (CDF) esté habilitado en la tabla. Si la consulta no devuelve resultados, ¡es posible que tengas que ejecutar el `DELETE` de nuevo *después* de habilitar CDF!</p></div>
+
+                    <h4 class="font-bold text-xl mt-6 mb-2">Paso 3: Justificación Técnica</h4>
+                    <p class="text-sm text-gray-500 mb-2">Explica brevemente por qué `RESTORE` es la herramienta más segura para esta operación.</p>
+                    <textarea id="m1_justification" class="w-full h-24 p-2 rounded" placeholder="RESTORE es la opción más segura porque crea una nueva transacción de reversión, manteniendo el historial completo intacto para fines de auditoría, a diferencia de..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Misión 2 -->
+            <div id="mission2" class="mission-content">
+                 <div class="bg-gray-900 p-8 rounded-xl shadow-lg">
+                    <h3 class="text-3xl font-bold text-blue-300 mb-2">Misión 2: Diagnóstico y Refactorización</h3>
+                    <p class="mb-4 text-gray-400">Un analista creó una consulta lenta y poco escalable. Diagnostica sus problemas con `EXPLAIN` y reescríbela para máxima eficiencia.</p>
+                    
+                     <h4 class="font-bold text-lg mt-6 mb-2">Consulta Original (Ineficiente):</h4>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard('m2_original_code')">Copiar</button>
+                        <pre id="m2_original_code"><code class="language-sql">SELECT p.id_pedido, u.nombre_usuario, pr.nombre_producto
+FROM pedidos_silver p
+JOIN usuarios_silver u ON p.id_usuario = u.id_usuario
+JOIN productos_silver pr ON p.id_producto = pr.id_producto
+WHERE
+(SELECT categoria FROM productos_silver WHERE id_producto = p.id_producto) = 'Libros'
+AND u.ciudad = 'Madrid';</code></pre>
+                    </div>
+
+                    <h4 class="font-bold text-xl mt-6 mb-2">Paso 1: Query Refactorizado y Optimizado</h4>
+                    <p class="text-sm text-gray-500 mb-2">Pega aquí tu versión mejorada de la consulta. Recuerda incluir un filtro de fecha para aprovechar el particionamiento.</p>
+                    <textarea id="m2_query1" class="w-full h-48 p-2 rounded font-mono text-sm" placeholder="-- Consulta Optimizada&#10;SELECT p.id_pedido, u.nombre_usuario, pr.nombre_producto&#10;FROM pedidos_silver p ..."></textarea>
+                    <button class="text-sm text-yellow-400 hover:text-yellow-300 mt-2" onclick="toggleHint('hint2')">Ver Pista</button>
+                    <div id="hint2" class="hint-box"><p>La forma más eficiente de filtrar por `categoria` es unir `pedidos_silver` con `productos_silver` y luego aplicar el filtro en la cláusula `WHERE` principal. Esto elimina la costosa subconsulta correlacionada.</p></div>
+                    
+                    <h4 class="font-bold text-xl mt-6 mb-2">Paso 2: Justificación Técnica</h4>
+                    <p class="text-sm text-gray-500 mb-2">Explica, basándote en los planes de ejecución, por qué tu versión es superior. Menciona conceptos como "subconsulta correlacionada", "Partition Pruning" y "Pushed Filters".</p>
+                    <textarea id="m2_justification" class="w-full h-32 p-2 rounded" placeholder="La consulta original era ineficiente por su uso de una subconsulta correlacionada, que obliga a Spark a ejecutar una búsqueda por cada fila de 'pedidos_silver'. Mi versión optimizada mejora el rendimiento al..."></textarea>
+                </div>
+            </div>
+
+            <!-- Misión 3 -->
+            <div id="mission3" class="mission-content">
+                <div class="bg-gray-900 p-8 rounded-xl shadow-lg">
+                    <h3 class="text-3xl font-bold text-blue-300 mb-2">Misión 3: Mantenimiento Proactivo del Lakehouse</h3>
+                    <p class="mb-4 text-gray-400">Demuestra tu conocimiento de la optimización física de Delta Lake ejecutando tareas de mantenimiento y justificando tus decisiones estratégicas.</p>
+                    
+                    <h4 class="font-bold text-xl mt-6 mb-2">Paso 1: Comandos de Mantenimiento</h4>
+                    <p class="text-sm text-gray-500 mb-2">Pega aquí los comandos `OPTIMIZE` (con Z-Ordering) y `ANALYZE TABLE` que ejecutaste sobre `pedidos_silver`.</p>
+                    <textarea id="m3_query1" class="w-full h-24 p-2 rounded font-mono text-sm" placeholder="OPTIMIZE pedidos_silver ZORDER BY (id_usuario, id_producto);&#10;ANALYZE TABLE pedidos_silver COMPUTE STATISTICS FOR ALL COLUMNS;"></textarea>
+                    
+                    <h4 class="font-bold text-xl mt-6 mb-2">Paso 2: Justificación Técnica (Particionamiento vs. Z-Ordering)</h4>
+                    <p class="text-sm text-gray-500 mb-2">Un desarrollador junior propone particionar `usuarios_silver` por `ciudad` (columna de alta cardinalidad). Explica detalladamente por qué `ZORDER BY (ciudad)` es una estrategia muy superior.</p>
+                    <textarea id="m3_justification" class="w-full h-32 p-2 rounded" placeholder="Particionar por una columna de alta cardinalidad como 'ciudad' es una mala práctica porque generaría un problema de 'archivos pequeños' (small files problem), donde... En cambio, Z-Ordering agrupa los datos relacionados dentro de archivos más grandes, permitiendo un 'file skipping' eficiente sin..."></textarea>
+                    <button class="text-sm text-yellow-400 hover:text-yellow-300 mt-2" onclick="toggleHint('hint3')">Ver Pista</button>
+                    <div id="hint3" class="hint-box"><p>Piensa en la cardinalidad. Particionar crea directorios. Si hay miles de ciudades, crearías miles de directorios, la mayoría con muy pocos datos. Z-Ordering, en cambio, ordena los datos dentro de los archivos existentes, lo cual es mucho más eficiente para columnas con muchos valores únicos.</p></div>
+                </div>
+            </div>
+
+            <!-- Misión 4 -->
+            <div id="mission4" class="mission-content">
+                 <div class="bg-gray-900 p-8 rounded-xl shadow-lg">
+                    <h3 class="text-3xl font-bold text-blue-300 mb-2">Misión 4: Creando Valor con SQL Analítico</h3>
+                    <p class="mb-4 text-gray-400">El equipo de marketing necesita un reporte complejo de "Inteligencia de Clientes". Constrúyelo en una sola consulta usando CTEs y funciones de ventana.</p>
+                    
+                    <h4 class="font-bold text-lg mt-6 mb-2">Requisitos del Reporte:</h4>
+                    <ul class="list-disc list-inside ml-4 mb-4 text-gray-400">
+                        <li>Por cada `id_usuario`, calcula: `total_gastado`, `numero_pedidos`, `pedido_mas_caro`, y `dias_promedio_entre_compras`.</li>
+                    </ul>
+
+                    <h4 class="font-bold text-xl mt-6 mb-2">Paso 1: Consulta Completa de Inteligencia de Clientes</h4>
+                    <p class="text-sm text-gray-500 mb-2">Pega aquí tu consulta final, bien comentada, usando CTEs y funciones de ventana como `LAG()`.</p>
+                    <textarea id="m4_query1" class="w-full h-64 p-2 rounded font-mono text-sm" placeholder="WITH CalculoPrevios AS (&#10;  SELECT&#10;    id_usuario,&#10;    ts_pedido,&#10;    LAG(ts_pedido, 1) OVER (PARTITION BY id_usuario ORDER BY ts_pedido) AS pedido_anterior&#10;  FROM pedidos_silver&#10;), ..."></textarea>
+                    <button class="text-sm text-yellow-400 hover:text-yellow-300 mt-2" onclick="toggleHint('hint4')">Ver Pista</button>
+                    <div id="hint4" class="hint-box"><p>Estructura tu solución en dos CTEs. La primera CTE (`PedidosConLag`) debería calcular la fecha del pedido anterior para cada pedido de un cliente. La segunda CTE (`PedidosConDiferencia`) debería calcular la diferencia en días. La consulta final agrupará los resultados de la segunda CTE para obtener los agregados finales.</p></div>
+                </div>
+            </div>
+
+            <!-- Misión 5: Informe Final -->
+            <div id="mission5" class="mission-content">
+                <div class="bg-gray-900 p-8 rounded-xl shadow-lg text-center">
+                    <h3 class="text-3xl font-bold text-blue-300 mb-4">Generación del Informe Final</h3>
+                    <p class="text-gray-400 mb-6">Has completado todos los desafíos. Asegúrate de que tu nombre esté ingresado correctamente y haz clic en el botón para generar tu informe de certificación.</p>
+                    <div class="max-w-md mx-auto">
+                        <div class="mb-4">
+                            <label for="candidateNameFinal" class="block text-sm font-medium text-gray-300 mb-1">Nombre del Candidato:</label>
+                            <input type="text" id="candidateNameFinal" placeholder="Ingresa tu nombre completo aquí" class="w-full p-2 rounded bg-gray-800 border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <button id="generateReportBtnFinal" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+                            Generar Mi Informe Ahora
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Printable Report Area -->
+    <div id="printable-report" class="p-8" style="display: none; color: black; background-color: white;">
+        <div id="report-header" class="text-center border-b-2 border-gray-300 pb-4 mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Informe de Certificación: Arquitecto de Datos</h1>
+            <p class="text-lg text-gray-600" id="report-candidate-name"></p>
+            <p class="text-sm text-gray-500" id="report-date"></p>
+        </div>
+        <div id="report-content"></div>
+    </div>
+
+    <script>
+        const tabs = document.querySelectorAll('.mission-tab');
+        const contents = document.querySelectorAll('.mission-content');
+        const candidateNameInput = document.getElementById('candidateName');
+        const candidateNameFinalInput = document.getElementById('candidateNameFinal');
+        const generateReportBtn = document.getElementById('generateReportBtn');
+        const generateReportBtnFinal = document.getElementById('generateReportBtnFinal');
+
+        // Sync candidate names
+        if (candidateNameInput && candidateNameFinalInput) {
+            candidateNameInput.addEventListener('input', (e) => {
+                candidateNameFinalInput.value = e.target.value;
+            });
+            candidateNameFinalInput.addEventListener('input', (e) => {
+                candidateNameInput.value = e.target.value;
+            });
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.getAttribute('data-target');
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                contents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === target) {
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            // Simple feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '¡Copiado!';
+            setTimeout(() => { btn.textContent = originalText; }, 2000);
+        }
+
+        function toggleHint(hintId) {
+            const hintBox = document.getElementById(hintId);
+            if (hintBox.style.display === 'block') {
+                hintBox.style.display = 'none';
+            } else {
+                hintBox.style.display = 'block';
+            }
+        }
+        
+        function generateReport() {
+            const candidateName = candidateNameInput.value;
+            if (!candidateName) {
+                alert('Por favor, ingresa tu nombre completo para generar el informe.');
+                return;
+            }
+
+            const reportContent = document.getElementById('report-content');
+            reportContent.innerHTML = ''; // Clear previous content
+
+            document.getElementById('report-candidate-name').textContent = `Candidato: ${candidateName}`;
+            document.getElementById('report-date').textContent = `Fecha de Generación: ${new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+
+            // Mission 1
+            reportContent.innerHTML += `
+                <h2>Misión 1: Recuperación y Auditoría</h2>
+                <h3>Query de Cuantificación de Impacto:</h3>
+                <pre>${document.getElementById('m1_query1').value || 'Sin respuesta.'}</pre>
+                <h3>Query de Informe Forense (CDF):</h3>
+                <pre>${document.getElementById('m1_query2').value || 'Sin respuesta.'}</pre>
+                <h3>Justificación Técnica:</h3>
+                <div class="justification">${document.getElementById('m1_justification').value.replace(/\n/g, '<br>') || 'Sin respuesta.'}</div>
+            `;
+            
+            // Mission 2
+            reportContent.innerHTML += `
+                <h2>Misión 2: Diagnóstico y Refactorización</h2>
+                <h3>Query Refactorizado y Optimizado:</h3>
+                <pre>${document.getElementById('m2_query1').value || 'Sin respuesta.'}</pre>
+                <h3>Justificación Técnica:</h3>
+                <div class="justification">${document.getElementById('m2_justification').value.replace(/\n/g, '<br>') || 'Sin respuesta.'}</div>
+            `;
+
+            // Mission 3
+            reportContent.innerHTML += `
+                <h2>Misión 3: Mantenimiento Proactivo</h2>
+                <h3>Comandos de Mantenimiento:</h3>
+                <pre>${document.getElementById('m3_query1').value || 'Sin respuesta.'}</pre>
+                <h3>Justificación Técnica (Particionamiento vs. Z-Ordering):</h3>
+                <div class="justification">${document.getElementById('m3_justification').value.replace(/\n/g, '<br>') || 'Sin respuesta.'}</div>
+            `;
+
+            // Mission 4
+            reportContent.innerHTML += `
+                <h2>Misión 4: SQL Analítico</h2>
+                <h3>Consulta de Inteligencia de Clientes:</h3>
+                <pre>${document.getElementById('m4_query1').value || 'Sin respuesta.'}</pre>
+            `;
+
+            document.getElementById('printable-report').style.display = 'block';
+            window.print();
+            document.getElementById('printable-report').style.display = 'none';
+        }
+
+        if (generateReportBtn) {
+            generateReportBtn.addEventListener('click', generateReport);
+        }
+        if (generateReportBtnFinal) {
+            generateReportBtnFinal.addEventListener('click', generateReport);
+        }
+
+    </script>
+</body>
+</html>
+
