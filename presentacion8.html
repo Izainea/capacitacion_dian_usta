@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 8: Cierre y Próximos Pasos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #111827; /* bg-gray-900 */
+        }
+        section { 
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out; 
+            width: 100%;
+        }
+        section.active { 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .diagram-container { 
+            min-height: 450px; 
+            width: 100%; 
+        }
+        .content-box {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-top: 8px solid #10b981; /* border-emerald-500 */
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            width: 100%;
+        }
+        .code-block {
+            background-color: #0d1117;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            border: 1px solid #30363d;
+        }
+    </style>
+</head>
+<body class="text-white flex flex-col items-center justify-center min-h-screen p-4">
+    
+    <main class="w-full max-w-6xl mx-auto">
+        <!-- Intro -->
+        <section><div class="content-box text-center"><h2 class="text-5xl font-black text-white mb-4 tracking-tight">El Viaje del Arquitecto de Datos</h2><p class="text-2xl text-gray-300"><b>Módulo 8: Cierre y Próximos Pasos en tu Carrera</b></p></div></section>
+        <section><div class="content-box text-center"><h2 class="text-5xl font-black text-white mb-4 tracking-tight">¡Felicitaciones!</h2><p class="text-2xl text-gray-300">Han completado un riguroso viaje de aprendizaje. Hoy, consolidamos ese conocimiento.</p></div></section>
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">El Objetivo del Curso: Una Retrospectiva</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Nuestro objetivo no era solo aprender comandos SQL. Era cambiar la mentalidad: pasar de ser un **escritor de consultas** a un **diseñador de sistemas de datos**.</p></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Recapitulación de Nuestro Viaje</h2><div id="diagram-recap" class="diagram-container"></div></div></section>
+
+        <!-- Part 1: Foundations -->
+        <section><div class="content-box text-center"><p class="text-xl text-emerald-400 font-bold">Parte 1: Consolidando los Fundamentos</p><h2 class="text-5xl font-black text-white mt-2 tracking-tight">Los Pilares del Diseño de Datos</h2></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Cimiento: Diseño Relacional</h2><p class="text-lg text-gray-400 text-center mb-8">Incluso en un Lakehouse, los datos de origen a menudo provienen de sistemas transaccionales (OLTP). Entender sus reglas es fundamental.</p><div class="grid md:grid-cols-2 gap-8"><div class="bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-cyan-300 mb-3">Normalización</h3><p class="text-gray-300">La técnica para eliminar la redundancia y prevenir anomalías de datos (inserción, actualización, borrado), garantizando la integridad.</p></div><div class="bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-green-300 mb-3">Llaves (PK, FK)</h3><p class="text-gray-300">Definen la unicidad y las relaciones. Son el "pegamento" que permite que los `JOINs` funcionen de manera fiable y modelen el negocio.</p></div></div></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">De OLTP a OLAP: El Gran Salto</h2><p class="text-lg text-gray-400 text-center mb-8">Comprendimos la diferencia crucial entre diseñar para transacciones y diseñar para análisis.</p><div class="grid md:grid-cols-2 gap-8"><div class="bg-violet-900/50 p-6 rounded-lg border border-violet-700"><h3 class="text-2xl font-bold text-violet-300 mb-3">OLTP (Origen)</h3><p class="text-gray-300">Prioriza la escritura rápida y la integridad. El diseño es **altamente normalizado** (3NF).</p></div><div class="bg-amber-900/50 p-6 rounded-lg border border-amber-700"><h3 class="text-2xl font-bold text-amber-300 mb-3">OLAP (Destino)</h3><p class="text-gray-300">Prioriza la lectura rápida y el análisis. El diseño es **desnormalizado** (Esquema de Estrella de Kimball).</p></div></div></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">La Arquitectura Medallion: Nuestro Mapa</h2><p class="text-lg text-gray-400 text-center mb-8">Adoptamos un estándar de la industria para construir pipelines de datos fiables y escalables.</p><div id="diagram-medallion" class="diagram-container"></div></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Delta Lake: El Motor del Lakehouse</h2><p class="text-lg text-gray-400 text-center mb-8">Delta Lake es la tecnología que nos permite aplicar principios de bases de datos sobre nuestro Data Lake.</p><ul class="list-disc list-inside space-y-3 text-xl text-gray-300 max-w-2xl mx-auto"><li><b>Transacciones ACID:</b> Aportan fiabilidad a nuestras operaciones.</li><li><b>Time Travel y Auditoría:</b> Nos dan la confianza para experimentar y recuperarnos de errores.</li><li><b>Schema Enforcement:</b> Previene la corrupción de datos en nuestras tablas.</li></ul></div></section>
+        
+        <!-- Part 2: Performance -->
+        <section><div class="content-box text-center"><p class="text-xl text-emerald-400 font-bold">Parte 2: Dominando el Rendimiento</p><h2 class="text-5xl font-black text-white mt-2 tracking-tight">De Lento a Ultrarrápido</h2></div></section>
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">El Rendimiento No es Magia, es Diseño</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Aprendimos que la velocidad no es accidental. Es el resultado de decisiones de diseño físico deliberadas. La meta siempre es la misma: **leer la menor cantidad de datos posible**.</p></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Nuestra Herramienta de Diagnóstico: `EXPLAIN`</h2><p class="text-lg text-gray-400 text-center mb-8">Con `EXPLAIN`, pasamos de "suponer" a "saber". Es la clave para entender cómo Spark ejecuta nuestras consultas y para validar nuestras optimizaciones.</p><div class="code-block"><pre><code class="language-sql">-- Pistas que buscamos en un Plan Físico:
+-- PartitionFilters: ¿Estamos usando las particiones? (¡Bien!)
+-- PushedFilters: ¿Se aplican los filtros al inicio? (¡Bien!)
+-- BroadcastHashJoin: ¿Se evita un shuffle? (¡Excelente!)
+-- SortMergeJoin: ¿Se manejan tablas grandes? (¡Necesario a veces!)</code></pre></div></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Optimización Macro: Particionamiento</h2><p class="text-lg text-gray-400 text-center mb-8">Nuestra primera línea de defensa. Ideal para columnas de **baja cardinalidad** usadas en filtros, como la fecha.</p><div class="text-center bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-cyan-300 mb-3">Directory Skipping (Salto de Directorios)</h3><p class="text-gray-300">Al filtrar por fecha, Spark ignora físicamente el 99% de los directorios, resultando en una mejora de rendimiento masiva.</p></div></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Optimización Micro: Z-Ordering</h2><p class="text-lg text-gray-400 text-center mb-8">Nuestra herramienta de precisión. Ideal para columnas de **alta cardinalidad** usadas en filtros o `JOINs`.</p><div class="text-center bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-yellow-300 mb-3">File Skipping (Salto de Archivos)</h3><p class="text-gray-300">Dentro de una partición, Spark usa las estadísticas de los archivos para leer solo aquellos que contienen los datos relevantes, ignorando el resto.</p></div></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">El Mantenimiento es Clave</h2><p class="text-lg text-gray-400 text-center mb-8">Un sistema optimizado requiere mantenimiento proactivo para seguir siéndolo.</p><div class="grid md:grid-cols-2 gap-8"><div class="bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-cyan-300 mb-3">`OPTIMIZE`</h3><p class="text-gray-300">Compacta archivos pequeños para acelerar las lecturas y aplica el Z-Ordering para mantener los datos organizados.</p></div><div class="bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-green-300 mb-3">`ANALYZE TABLE`</h3><p class="text-gray-300">Recolecta estadísticas frescas para que el optimizador Catalyst pueda tomar las mejores decisiones al crear planes de ejecución.</p></div></div></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">El Flujo de Datos Completo</h2><p class="text-lg text-gray-400 text-center mb-8">Este diagrama resume todo el proceso que hemos construido, desde la ingesta hasta la capa de valor.</p><div id="diagram-flujo" class="diagram-container"></div></div></section>
+        
+        <!-- Part 3: Advanced Skills -->
+        <section><div class="content-box text-center"><p class="text-xl text-emerald-400 font-bold">Parte 3: Habilidades del Arquitecto Moderno</p><h2 class="text-5xl font-black text-white mt-2 tracking-tight">Más Allá de un `SELECT *`</h2></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">CTEs: El Arte del Código Legible</h2><p class="text-lg text-gray-400 text-center mb-8">Las `Common Table Expressions` transforman "infiernos de subconsultas" en lógica modular, limpia y fácil de mantener. Son la marca de un desarrollador SQL profesional.</p><div id="diagram-cte" class="diagram-container"></div></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-6 text-center">Funciones de Ventana: El Superpoder del Analista</h2><p class="text-lg text-gray-400 text-center mb-8">Nos permiten realizar cálculos complejos sobre un "marco" o "ventana" de datos sin colapsar las filas, habilitando análisis como rankings, series temporales y comparativas.</p><div class="text-center bg-gray-700 p-6 rounded-lg"><h3 class="text-2xl font-bold text-violet-300 mb-3">`RANK() OVER (PARTITION BY ... ORDER BY ...)`</h3><p class="text-gray-300">Es la estructura fundamental para la mayoría de los análisis de negocio avanzados.</p></div></div></section>
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">Ahora eres más que un escritor de SQL</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">Has adquirido un conjunto de habilidades que te permite no solo responder preguntas, sino **diseñar sistemas que respondan preguntas de forma eficiente y fiable**.</p><div class="grid md:grid-cols-2 gap-8 mt-8 text-left text-lg"><div class="bg-gray-700/50 p-6 rounded-lg"> <h3 class="text-2xl font-bold text-cyan-300 mb-3">Puedes Diagnosticar</h3><p class="text-gray-300">Sabes leer un plan de ejecución e identificar por qué una consulta es lenta.</p></div><div class="bg-gray-700/50 p-6 rounded-lg"><h3 class="text-2xl font-bold text-green-300 mb-3">Puedes Optimizar</h3><p class="text-gray-300">Conoces las herramientas (Particionamiento, Z-Ordering, SQL avanzado) para reescribir y acelerar las consultas.</p></div><div class="bg-gray-700/50 p-6 rounded-lg"><h3 class="text-2xl font-bold text-yellow-300 mb-3">Puedes Diseñar</h3><p class="text-gray-300">Entiendes los principios de la arquitectura Medallion y el modelado dimensional para construir pipelines de datos robustos.</p></div><div class="bg-gray-700/50 p-6 rounded-lg"><h3 class="text-2xl font-bold text-violet-300 mb-3">Puedes Auditar</h3><p class="text-gray-300">Sabes usar `DESCRIBE HISTORY` y `Time Travel` para garantizar la confianza y la gobernanza de los datos.</p></div></div></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Tu Lugar en el Ecosistema de Datos</h2><div id="diagram-roles" class="diagram-container"></div></div></section>
+
+        <!-- Conclusion -->
+        <section><div class="content-box text-center"><p class="text-xl text-emerald-400 font-bold">Conclusión y Futuro</p><h2 class="text-5xl font-black text-white mt-2 tracking-tight">El Viaje Apenas Comienza</h2></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Las 3 Ideas Clave para Recordar</h2><div class="grid md:grid-cols-3 gap-6 text-center"><div class="bg-gray-700/50 p-6 rounded-lg border border-gray-600"><div class="text-3xl mb-3">🏛️</div><h3 class="text-xl font-bold text-emerald-300 mb-2">Piensa Primero, Codifica Después</h3><p class="text-gray-400">La arquitectura y el diseño son la base de un sistema de datos robusto y escalable.</p></div><div class="bg-gray-700/50 p-6 rounded-lg border border-gray-600"><div class="text-3xl mb-3">⚡</div><h3 class="text-xl font-bold text-emerald-300 mb-2">El Rendimiento es Diseño</h3><p class="text-gray-400">La velocidad es el resultado de decisiones físicas deliberadas (`PARTITION`, `ZORDER`).</p></div><div class="bg-gray-700/50 p-6 rounded-lg border border-gray-600"><div class="text-3xl mb-3">🔍</div><h3 class="text-xl font-bold text-emerald-300 mb-2">No Adivines, Diagnostica</h3><p class="text-gray-400">`EXPLAIN` es tu herramienta para tomar decisiones basadas en evidencia.</p></div></div></div></section>
+        <section><div class="content-box"><h2 class="text-4xl font-bold text-white mb-8 text-center">Próximos Pasos en tu Carrera</h2><p class="text-lg text-gray-400 text-center mb-8">Este curso es una base sólida. Aquí hay algunas áreas para seguir creciendo:</p><ul class="list-disc list-inside space-y-4 text-xl text-gray-300 max-w-2xl mx-auto"><li><b>Profundizar en PySpark:</b> Ir más allá de SQL para implementar lógica más compleja, UDFs y algoritmos de Machine Learning.</li><li><b>Streaming y Datos en Tiempo Real:</b> Aprender a aplicar los mismos principios de la arquitectura Medallion a datos que llegan en tiempo real usando Structured Streaming.</li><li><b>Gobernanza de Datos con Unity Catalog:</b> Explorar cómo gestionar permisos, linaje de datos y seguridad a escala empresarial.</li><li><b>Orquestación de Pipelines:</b> Usar herramientas como Databricks Workflows o Airflow para automatizar, programar y monitorear tus pipelines de datos en producción.</li></ul></div></section>
+        <section><div class="content-box text-center"><h2 class="text-4xl font-bold text-white mb-4">El Aprendizaje Nunca Termina</h2><p class="text-xl text-gray-300 max-w-3xl mx-auto">El campo de los datos evoluciona rápidamente. Mantente curioso, sigue practicando y nunca dejes de hacer preguntas.</p></div></section>
+        <section><div class="content-box text-center"><h2 class="text-5xl font-black text-white mb-4 tracking-tight">Preguntas Finales y Discusión</h2><p class="text-2xl text-gray-300">¡El piso es suyo!</p></div></section>
+        <section><div class="content-box text-center"><h2 class="text-6xl font-black text-white tracking-tight">¡Felicitaciones y Gracias!</h2><p class="text-2xl text-gray-300 mt-6">Ha sido un placer guiarlos en este viaje. Ahora, a construir soluciones de datos increíbles.</p></div></section>
+    </main>
+    
+    <div class="fixed bottom-8 w-full flex justify-center items-center px-4">
+        <div class="bg-gray-700/50 backdrop-blur-sm rounded-full shadow-lg flex items-center space-x-4 p-2">
+            <button id="prevBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-3 rounded-full shadow-lg transition-transform transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <div id="slide-counter" class="text-lg font-bold text-white tabular-nums px-4"></div>
+            <button id="nextBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-3 rounded-full shadow-lg transition-transform transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('main > section');
+            let currentSlide = 0;
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const slideCounter = document.getElementById('slide-counter');
+
+            function drawDiagram(containerId, nodes, links, options = {}) {
+                const { width = 800, height = 450, linkDistance = 150, chargeStrength = -500 } = options;
+                d3.select(containerId).select("svg").remove();
+                const svg = d3.select(containerId).append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`);
+                
+                const simulation = d3.forceSimulation(nodes)
+                    .force("link", d3.forceLink(links).id(d => d.id).distance(linkDistance).strength(0.8))
+                    .force("charge", d3.forceManyBody().strength(chargeStrength))
+                    .force("center", d3.forceCenter(width / 2, height / 2));
+
+                svg.append("defs").append("marker")
+                    .attr("id", "arrow")
+                    .attr("viewBox", "0 -5 10 10")
+                    .attr("refX", 10)
+                    .attr("refY", 0)
+                    .attr("markerWidth", 6)
+                    .attr("markerHeight", 6)
+                    .attr("orient", "auto")
+                    .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#9ca3af");
+
+                const link = svg.append("g").selectAll("line").data(links).join("line")
+                    .attr("stroke", "#9ca3af").attr("stroke-width", 2)
+                    .attr("marker-end", "url(#arrow)");
+
+                const node = svg.append("g").selectAll("g").data(nodes).join("g");
+                
+                node.append("rect")
+                    .attr("width", d => d.width || 160).attr("height", d => d.height || 70)
+                    .attr("x", d => -(d.width || 160) / 2).attr("y", d => -(d.height || 70) / 2)
+                    .attr("rx", 10).attr("ry", 10)
+                    .attr("fill", d => d.color || "#1f2937").attr("stroke", d => d.stroke || "#4b5563").attr("stroke-width", 2);
+
+                node.append("text").attr("text-anchor", "middle").attr("fill", "white")
+                    .style("font-size", "12px").style("font-weight", "bold")
+                    .selectAll("tspan").data(d => d.id.split("\n")).join("tspan")
+                    .attr("x", 0).attr("dy", "1.2em")
+                    .attr("y", (d, i, nodes) => `${-(nodes.length - 1) * 0.6 + i * 1.2}em`)
+                    .text(d => d);
+                
+                simulation.on("tick", () => {
+                    link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+                    node.attr("transform", d => `translate(${d.x},${d.y})`);
+                });
+                return {svg, simulation};
+            }
+            
+            function drawVisibleDiagram() {
+                const activeSlide = slides[currentSlide];
+                if (!activeSlide) return;
+                const container = activeSlide.querySelector('.diagram-container');
+                if (!container) return;
+                
+                const containerId = `#${container.id}`;
+                const commonOptions = { width: 800, height: 450 };
+
+                const recapNodes = [ {id: "Sesión 1\nDiseño"}, {id: "Sesión 2\nPlata"}, {id: "Sesión 3\nExplain"}, {id: "Sesión 4\nSQL Avanzado"}, {id: "Sesión 8\nCierre"} ];
+                const recapLinks = [ {source: recapNodes[0].id, target: recapNodes[1].id}, {source: recapNodes[1].id, target: recapNodes[2].id}, {source: recapNodes[2].id, target: recapNodes[3].id}, {source: recapNodes[3].id, target: recapNodes[4].id} ];
+                
+                const medallionNodes = [{id: "Bronce\n(Crudo)", color: "#ca8a04"}, {id: "Plata\n(Limpio)", color: "#6b7280"}, {id: "Oro\n(Agregado)", color: "#f59e0b"}];
+                const medallionLinks = [{source: medallionNodes[0].id, target: medallionNodes[1].id}, {source: medallionNodes[1].id, target: medallionNodes[2].id}];
+
+                const flujoNodes = [ { id: "Fuentes", color: "#f87171" }, { id: "Bronce", color: "#ca8a04" }, { id: "Plata", color: "#6b7280" }, { id: "Oro", color: "#f59e0b" }, { id: "BI / ML", color: "#10b981" }, { id: "Optimización", color: "#8b5cf6" }, { id: "Auditoría", color: "#3b82f6" } ];
+                const flujoLinks = [ { source: flujoNodes[0].id, target: flujoNodes[1].id }, { source: flujoNodes[1].id, target: flujoNodes[2].id }, { source: flujoNodes[2].id, target: flujoNodes[3].id }, { source: flujoNodes[3].id, target: flujoNodes[4].id }, { source: flujoNodes[5].id, target: flujoNodes[2].id }, { source: flujoNodes[1].id, target: flujoNodes[6].id } ];
+                
+                const cteNodes = [{id: "Subconsultas\nAnidadas", color: "#dc2626", width: 180}, {id: "CTEs\n(WITH ...)", color: "#16a34a", width: 180}];
+                const cteLinks = [];
+
+                const rolesNodes = [{id: "Habilidades\ndel Curso", color: "#10b981", width: 180, height: 80}, {id: "Ingeniero\nde Datos"}, {id: "Analista\nde Datos"}, {id: "Ingeniero\nAnalítico"}, {id: "Científico\nde Datos"}];
+                const rolesLinks = [{source: rolesNodes[0].id, target: rolesNodes[1].id}, {source: rolesNodes[0].id, target: rolesNodes[2].id}, {source: rolesNodes[0].id, target: rolesNodes[3].id}, {source: rolesNodes[0].id, target: rolesNodes[4].id}];
+
+
+                switch(container.id) {
+                    case 'diagram-recap':
+                        drawDiagram(containerId, recapNodes, recapLinks, {...commonOptions, linkDistance: 160});
+                        break;
+                    case 'diagram-medallion':
+                        drawDiagram(containerId, medallionNodes, medallionLinks, commonOptions);
+                        break;
+                    case 'diagram-flujo':
+                        drawDiagram(containerId, flujoNodes, flujoLinks, commonOptions);
+                        break;
+                    case 'diagram-cte':
+                        drawDiagram(containerId, cteNodes, cteLinks, {...commonOptions, chargeStrength: -1000});
+                        break;
+                    case 'diagram-roles':
+                        drawDiagram(containerId, rolesNodes, rolesLinks, {...commonOptions, chargeStrength: -800});
+                        break;
+                }
+            }
+
+            function showSlide(index) {
+                if (!slides || slides.length === 0 || !prevBtn || !nextBtn || !slideCounter) {
+                    console.error("Presentation elements not found.");
+                    return;
+                }
+                slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+                prevBtn.disabled = index === 0;
+                nextBtn.disabled = index === slides.length - 1;
+                slideCounter.textContent = `${index + 1} / ${slides.length}`;
+                drawVisibleDiagram();
+            }
+            
+            prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); } });
+            nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); } });
+            document.addEventListener('keydown', (e) => { 
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    if (currentSlide < slides.length - 1) { currentSlide++; showSlide(currentSlide); }
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    if (currentSlide > 0) { currentSlide--; showSlide(currentSlide); }
+                }
+            });
+            
+            showSlide(currentSlide);
+        });
+    </script>
+</body>
+</html>
+
